@@ -5,7 +5,7 @@ import torch.optim as optim
 import torch.utils.data as data
 from torch.autograd import Variable
 from question_maker.model.encoder import Encoder
-from question_maker.model.decoder import Dncoder
+from question_maker.model.decoder import Decoder
 
 
 class Seq2Seq(nn.Module):
