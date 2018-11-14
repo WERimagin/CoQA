@@ -12,6 +12,7 @@ import pickle
 import collections
 
 
+
 def c2wpointer(context_text,context,answer_start,answer_end):#answer_start,endをchara単位からword単位へ変換
     #nltk.tokenizeを使って分割
     #ダブルクオテーションがなぜか変化するので処理

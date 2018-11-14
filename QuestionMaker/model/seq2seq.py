@@ -7,6 +7,7 @@ from torch.autograd import Variable
 from questionmaker.model import Encoder,Decoder
 
 
+
 class Seq2Seq(nn.Module):
     def __init__(self,args):
         super(Seq2Seq, self).__init__()

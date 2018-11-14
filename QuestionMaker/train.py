@@ -8,6 +8,7 @@
 #3.モデルに入れてp1,p2(スタート位置、エンド位置を出力)
 #4.predictはp1,p2それぞれのargmaxを取り、それと正解の位置を比較して出力する
 
+
 import sys
 sys.path.append("../")
 from tqdm import tqdm
