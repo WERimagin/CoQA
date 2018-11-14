@@ -43,6 +43,7 @@ def data_process(input_path,output_path,word_count,lower=True):
     answer_starts=[]
     answer_ends=[]
     answer_texts=[]
+    answers=[]
     ids=[]
     word2count=collections.Counter()
     char2count=collections.Counter()
