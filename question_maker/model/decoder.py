@@ -41,5 +41,5 @@ class Decoder(nn.Module):
             current_input=predict.view(-1,1)
             outputs[i]=output
 
-        outputs=torch.transpose(outputs,(0,1))#(batch,seq_len,vocab_size)
+        outputs=torch.transpose(outputs,0,1)#(batch,seq_len,vocab_size)
         return outputs
