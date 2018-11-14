@@ -132,9 +132,11 @@ def vec_process(contexts,word2id,char2id):
         if w.lower() in w2vec:
             id2vec[i]=w2vec[w.lower()]
 
+
+
     with open("data/word2id2vec.json","w")as f:
         t={"word2id":word2id,
-            "id2vec":id2vec,
+            "id2vec":id2vec.tolist(),
             "char2id":char2id}
         json.dump(t,f)
 
