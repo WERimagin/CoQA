@@ -58,7 +58,7 @@ def data_loader(args,path,first=True):
 
     if first:
         args.c_vocab_size=len(char2id)
-        args.pretrained_weight=id2vec
+        args.pretrained_weight=np.array(id2vec)
         args.vocab_size=id2vec.shape[0]
         args.embed_size=id2vec.shape[1]
 
