@@ -1,5 +1,7 @@
 #SQuADのデータ処理
 
+import sys
+sys.path.append("../")
 import json
 import gzip
 import pandas as pd
@@ -133,5 +135,5 @@ def vec_process(contexts,word2id,char2id):
 #main
 
 version="1.1"
-data_process(input_path="../data/squad_train-v{}.json".format(version),output_path="../data/squad_train_data.json",word_count=True,lower=True)
-data_process(input_path="../data/squad_test-v{}.json".format(version),output_path="../data/squad_test_data.json",word_count=False,lower=True)
+data_process(input_path="data/squad_train-v{}.json".format(version),output_path="data/squad_train_data.json",word_count=True,lower=True)
+data_process(input_path="data/squad_dev-v{}.json".format(version),output_path="data/squad_test_data.json",word_count=False,lower=True)
