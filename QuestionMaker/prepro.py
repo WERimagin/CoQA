@@ -129,11 +129,13 @@ def vec_process(contexts,word2id,char2id):
         if w.lower() in w2vec:
             id2vec[i]=w2vec[w.lower()]
 
-    with open("data/word2id2vec.pickle","wb")as f:
-        pickle.dump((word2id,id2vec,char2id),f)
+    with open("data/word2id2vec.json","w")as f:
+        t={"word2id":word2id,
+            "id2vec":id2vec,
+            "char2id":char2id}
+        json.dump(t,f)
 
 #main
-
 version="1.1"
 data_process(input_path="data/squad_train-v{}.json".format(version),output_path="data/squad_train_data.json",word_count=True,lower=True)
 data_process(input_path="data/squad_dev-v{}.json".format(version),output_path="data/squad_test_data.json",word_count=False,lower=True)
