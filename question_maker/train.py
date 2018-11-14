@@ -48,6 +48,8 @@ def data_loader(args,path,first=True):
     else:
         data_size=len(contexts)
 
+    id2vec=np.array(id2vec)
+
     contexts_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in contexts[0:data_size]]
     questions_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in questions[0:data_size]]
     answers_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in answers[0:data_size]]
@@ -58,7 +60,7 @@ def data_loader(args,path,first=True):
 
     if first:
         args.c_vocab_size=len(char2id)
-        args.pretrained_weight=np.array(id2vec)
+        args.pretrained_weight=id2vec
         args.vocab_size=id2vec.shape[0]
         args.embed_size=id2vec.shape[1]
 
