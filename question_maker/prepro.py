@@ -109,7 +109,7 @@ def data_process(input_path,output_path,word_count,lower=True):
         char2id={c:i for i,(c,count) in enumerate(char2count.items(),2) if count>=0}
         char2id["<eos>"]=0
         char2id["<unk>"]=1
-        #vec_process(contexts,word2id,char2id)
+        vec_process(contexts,word2id,char2id)
 
 
 def vec_process(contexts,word2id,char2id):
