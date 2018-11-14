@@ -26,7 +26,7 @@ class Decoder(nn.Module):
         output,hidden=self.gru(embed,self.hidden)#(batch,1,hidden_size*2)
         self.hidden=hidden
         output=torch.squeeze(self.out(output),1)#(batch,vocab_size)
-        predict=torch.argmax(output,dim=-1)[0]#(batch)
+        predict=torch.argmax(output,dim=-1)#(batch)
         return output,predict
 
     def forward(self,input,encoder_hidden):#input:(batch,seq_len),encoder_hidden:(seq_len,hidden_size*2)
