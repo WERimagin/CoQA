@@ -1,0 +1,11 @@
+gnore all
+*
+# allow directory and ignore directory with starting .
+!*/
+.*/
+# white list
+!.gitignore
+!*.ipynb
+!*.py
+!*.sh
+
