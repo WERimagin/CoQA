@@ -1,4 +1,4 @@
-import numpy as np
+import numpy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -32,9 +32,9 @@ class Decoder(nn.Module):
         batch_size=input.size(0)
         seq_len=input.size(1)
         self.hidden=encoder_hidden
-        outputs=to_var(torch.from_numpy(np.zeros((seq_len,batch_size,self.vocab_size),dtype="long")))
+        outputs=to_var(torch.from_numpy(np.zeros((seq_len,batch_size,self.vocab_size))))
 
-        current_input=to_var(torch.zeros(batch_size))#(batch)
+        current_input=to_var(torch.from_numpy(np.zeros(batch_size,dtype="long")))
         for i in range(seq_len):#(batch,1)
             output,predict=self.decode_step(current_input)#(batch,vocab_size)(batch)
             current_input=predict
