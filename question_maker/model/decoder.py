@@ -22,6 +22,7 @@ class Decoder(nn.Module):
 
     def decode_step(self,input):#(batch,1)
         embed=self.word_embed(input)#(batch,1,embed_size)
+        print(input.size(),embed.size())
         output,hidden=self.gru(embed,self.hidden)#(batch,1,hidden_size*2)
         self.hidden=hidden
         output=torch.squeeze(self.out(output),1)#(batch,vocab_size)
