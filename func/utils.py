@@ -67,7 +67,7 @@ def to_var(x):
         x = x.cuda()
     return Variable(x)
 
-def make_vec(sentences):
+def make_vec(sentences,append_EOS):
     maxsize=max([len(sentence) for sentence in sentences])
     sentences_ex=[]
     for sentence in sentences:

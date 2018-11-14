@@ -12,7 +12,6 @@ import pickle
 import collections
 
 
-
 def c2wpointer(context_text,context,answer_start,answer_end):#answer_start,endをchara単位からword単位へ変換
     #nltk.tokenizeを使って分割
     #ダブルクオテーションがなぜか変化するので処理
@@ -84,25 +83,27 @@ def data_process(input_path,output_path,word_count,lower=True):
                 answer_start=a["answer_start"]
                 answer_end=a["answer_start"]+len(a["text"])
                 answer_start,answer_end=c2wpointer(context_text,context,answer_start,answer_end)
-                answer_text=tokenize(a["text"])
+                answer=tokenize(a["text"])
                 answer_starts.append(answer_start)
                 answer_ends.append(answer_end)
-                answer_texts.append(answer_text)
+                answers.append(answer)
 
     with open(output_path,"w")as f:
         t={"contexts":contexts,
             "questions":questions,
             "answer_starts":answer_starts,
             "answer_ends":answer_ends,
-            "answer_texts":answer_texts,
+            "answers":answer_texts,
             "ids":ids}
         json.dump(t,f)
 
     if word_count:
-        #<eos>:0,<unk>:1
-        word2id={w:i for i,(w,count) in enumerate(word2count.items(),2) if count>=0}
-        word2id["<eos>"]=0
+        #<pad>:0,<unk>:1,<eos>:2
+        #pad:padding用,unk:unknownトークン,eos:End of Sentence
+        word2id={w:i for i,(w,count) in enumerate(word2count.items(),3) if count>=0}
+        word2id["<pad>"]=0
         word2id["<unk>"]=1
+        word2id["<eos>"]=2
         char2id={c:i for i,(c,count) in enumerate(char2count.items(),2) if count>=0}
         char2id["<eos>"]=0
         char2id["<unk>"]=1
