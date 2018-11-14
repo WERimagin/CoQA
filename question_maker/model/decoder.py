@@ -35,7 +35,7 @@ class Decoder(nn.Module):
 
         current_input=to_var(torch.zeros(batch_size))#(batch)
         for i in range(seq_len):#(batch,1)
-            output,predict=decode_step(current_input)#(batch,vocab_size)(batch)
+            output,predict=self.decode_step(current_input)#(batch,vocab_size)(batch)
             current_input=predict
             outputs[i]=output
 
