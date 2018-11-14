@@ -28,8 +28,8 @@ class Decoder(nn.Module):
         return output,predict
 
     def forward(self,input,encoder_hidden):#input:(batch,seq_len),encoder_hidden:(seq_len,hidden_size*2)
-        batch_size=embed.size(0)
-        seq_len=embed.size(1)
+        batch_size=input.size(0)
+        seq_len=input.size(1)
         self.hidden=encoder_hidden
         outputs=to_var(torch.zeros(seq_len,batch_size,self.vocab_size))
 
