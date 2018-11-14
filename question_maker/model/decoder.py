@@ -38,7 +38,7 @@ class Decoder(nn.Module):
         current_input=to_var(torch.from_numpy(np.zeros((batch_size,1),dtype="long")))
         for i in range(seq_len):#(batch,1)
             output,predict=self.decode_step(current_input)#(batch,vocab_size)(batch)
-            current_input=predict
+            current_input=output
             outputs[i]=output
 
         outputs=torch.transpose(outputs,(0,1))#(batch,seq_len,vocab_size)
