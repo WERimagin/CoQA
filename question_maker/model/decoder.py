@@ -1,4 +1,6 @@
+import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from func.utils import Word2Id,DataLoader,make_vec,make_vec_c,to_var
 
 class Decoder(nn.Module):
