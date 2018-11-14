@@ -31,7 +31,7 @@ class Decoder(nn.Module):
         batch_size=input.size(0)
         seq_len=input.size(1)
         self.hidden=encoder_hidden
-        outputs=to_var(torch.zeros(seq_len,batch_size,self.vocab_size))
+        outputs=to_var(torch.from_numpy(np.zeros((seq_len,batch_size,self.vocab_size),dtype="long")))
 
         current_input=to_var(torch.zeros(batch_size))#(batch)
         for i in range(seq_len):#(batch,1)
