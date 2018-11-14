@@ -19,7 +19,7 @@ class Decoder(nn.Module):
         self.out=nn.Linear(self.hidden_size*2,self.vocab_size)
 
 
-    def decode_step(input):#(batch,1)
+    def decode_step(self,input):#(batch,1)
         embed=self.word_embed(input)#(batch,1,embed_size)
         output,hidden=self.gru(embed,self.hidden)#(batch,1,hidden_size*2)
         self.hidden=hidden
