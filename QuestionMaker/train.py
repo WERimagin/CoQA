@@ -9,7 +9,7 @@
 #4.predictはp1,p2それぞれのargmaxを取り、それと正解の位置を比較して出力する
 
 import sys
-
+sys.path.append("../")
 from tqdm import tqdm
 import nltk
 import pickle
@@ -100,7 +100,7 @@ def model_handler(args,data,train=True):
         q_words=make_vec([questions_id[i] for i in batch])
         if train:
             optimizer.zero_grad()
-        output=model(c_words,q_words,train=True)#(batch,seq_len)
+        output=model(c_words,train=True)#(batch,seq_len)
         if train:
             loss=criterion(predict,q_words)
             loss.backward()
