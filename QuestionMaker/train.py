@@ -24,7 +24,7 @@ import torch.optim as optim
 import torch.utils.data as data
 from torch.autograd import Variable
 import time
-from QuestionMaker.model import Seq2Seq
+from questionmaker.model import Seq2Seq
 from func.utils import Word2Id,DataLoader,make_vec,make_vec_c,to_var
 
 

@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data as data
 from torch.autograd import Variable
-from QuestionMaker.model import Encoder,Decoder
+from questionmaker.model import Encoder,Decoder
 
 
 class Seq2Seq(nn.Module):
