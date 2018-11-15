@@ -18,7 +18,7 @@ class Decoder(nn.Module):
 
         self.word_embed=nn.Embedding(self.vocab_size, self.embed_size,padding_idx=0,
                                     _weight=torch.from_numpy(args.pretrained_weight).float())
-        self.hidden_exchange=nn.Linear(self.hidden_size*2,self.hidden_size)
+        #self.hidden_exchange=nn.Linear(self.hidden_size*2,self.hidden_size)
         self.gru=nn.GRU(self.embed_size,self.hidden_size,bidirectional=False,dropout=args.dropout,batch_first=True)#decoderは双方向にできない
 
         self.attention=Attention(args)
@@ -28,7 +28,7 @@ class Decoder(nn.Module):
     def decode_step(self,input,encoder_output):#(batch,1)
         embed=self.word_embed(input)#(batch,1,embed_size)
         output,hidden=self.gru(embed,self.hidden)#(batch,1,hidden_size)
-        self.hidden=self.hidden_exchange(hidden)
+        self.hidden=hidden
         output=torch.squeeze(1)#(batch,hidden_size)
         attention_output=self.attention(output,encoder_output)#(batch,hidden_size*2)
 
@@ -40,7 +40,7 @@ class Decoder(nn.Module):
     def forward(self,encoder_output,encoder_hidden,q_words):#input:(batch,seq_len),encoder_hidden:(seq_len,hidden_size*2),q_words:(batch,q_seq_len)
         batch_size=q_words.size(0)
         q_seq_len=q_words.size(1)
-        self.hidden=encoder_hidden
+        self.hidden=torch.add(encoder_hidden[0],encoder_hidden[1])
         outputs=to_var(torch.from_numpy(np.zeros((q_seq_len,batch_size,self.vocab_size))))
         current_input=to_var(torch.from_numpy(np.zeros((batch_size,1),dtype="long")))#最初の隠れベクトル,<SOS>
 
