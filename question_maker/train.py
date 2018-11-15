@@ -71,14 +71,14 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--start_epoch", type=int, default="0", help="input model epoch")
     args = parser.parse_args()
-    args.epoch_num=12
+    args.epoch_num=100
     args.train_batch_size=16
     args.test_batch_size=4
     args.hidden_size=100
     args.c_embed_size=20
     args.dropout=0.2
     args.self_attention=True
-    args.lr=0.0005
+    args.lr=0.001
 
     return args
 

@@ -46,7 +46,7 @@ class Decoder(nn.Module):
 
         for i in range(q_seq_len):#(batch,1)
             output,predict=self.decode_step(current_input,encoder_output)#(batch,vocab_size)(batch)
-            current_input=predict.view(-1,1)
+            current_input=predict.view(-1,1)#(batch,1)
             outputs[i]=output
 
         outputs=torch.transpose(outputs,0,1)#(batch,seq_len,vocab_size)
