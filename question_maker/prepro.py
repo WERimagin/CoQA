@@ -55,7 +55,7 @@ def data_process(input_path,output_path,word_count,lower=True):
             context_text=paragraph["context"]
             if lower:
                 context_text=context_text.lower()
-            context=tokenize(context_text)
+            context=tokenize(context_text).append("<eos>")
             #メモリサイズの確保のため、サイズが大きいcontextはスキップ
             #結果的に、87599個のcontextのうち、500をカット
             if len(context)>=350:
@@ -71,21 +71,22 @@ def data_process(input_path,output_path,word_count,lower=True):
                     question_text=question_text.lower()
                 if len(qas["answers"])==0:
                     continue
-                a=qas["answers"][0]
-                question=tokenize(question_text)
+                question=tokenize(question_text).append("<eos>")
                 if word_count:
                     for word in question:
                         word2count[word]+=1
                         for char in word:
                             char2count[char]+=1
+
                 contexts.append(context)
                 questions.append(question)
                 id_num=qas["id"]
                 ids.append(id_num)
+                a=qas["answers"][0]
                 answer_start=a["answer_start"]
                 answer_end=a["answer_start"]+len(a["text"])
                 answer_start,answer_end=c2wpointer(context_text,context,answer_start,answer_end)
-                answer=tokenize(a["text"])
+                answer=tokenize(a["text"]).append("<eos>")
                 answer_starts.append(answer_start)
                 answer_ends.append(answer_end)
                 answers.append(answer)
@@ -102,6 +103,7 @@ def data_process(input_path,output_path,word_count,lower=True):
     if word_count:
         #<pad>:0,<unk>:1,<eos>:2
         #pad:padding用,unk:unknownトークン,eos:End of Sentence
+
         word2id={w:i for i,(w,count) in enumerate(word2count.items(),3) if count>=0}
         word2id["<pad>"]=0
         word2id["<unk>"]=1
