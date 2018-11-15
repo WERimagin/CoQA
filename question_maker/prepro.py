@@ -99,7 +99,7 @@ def data_process(input_path,output_path,word_count,lower=True):
             "questions":questions,
             "answer_starts":answer_starts,
             "answer_ends":answer_ends,
-            "answers":answer_texts,
+            "answers":answers,
             "ids":ids}
         json.dump(t,f)
 
