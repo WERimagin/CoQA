@@ -28,6 +28,7 @@ from torch.autograd import Variable
 import time
 from question_maker.model.seq2seq import Seq2Seq
 from func.utils import Word2Id,DataLoader,make_vec,make_vec_c,to_var
+from nltk.translate import bleu_score
 
 
 def data_loader(args,path,first=True):
@@ -106,6 +107,7 @@ def model_handler(args,data,train=True):
         model.eval()
     dataloader=DataLoader(data_size,batch_size,train)
     batches=dataloader()
+    loss_sum=0
     for i_batch,batch in tqdm(enumerate(batches)):
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
@@ -118,26 +120,20 @@ def model_handler(args,data,train=True):
             loss=loss_calc(predict,q_words)#batch*seq_lenをして内部で計算
             loss.backward()
             optimizer.step()
-            if i_batch%10==0:
-                now=time.time()
-                print(loss.item())
-                print("epoch,{}\tbatch\t{}\ttime:{}\n".format(epoch,i_batch,now-start))
-    """
-            if i_batch%500==0:
+            if i_batch%100==0:
                 with open("log.txt","a")as f:
                     now=time.time()
                     f.write("epoch,{}\tbatch\t{}\ttime:{}\n".format(epoch,i_batch,now-start))
         else:
-            p1_predict+=(torch.argmax(p1,dim=-1)==a_starts).sum().item()
-            p2_predict+=(torch.argmax(p2,dim=-1)==a_ends).sum().item()
+            loss_sum+=loss
 
     with open("log.txt","a")as f:
         if train:
             f.write("epoch:{}\ttime:{}\n".format(epoch,time.time()-start))
             torch.save(model.state_dict(), 'model/epoch_{}_model.pth'.format(epoch))
         else:
-            f.write("p1_predict{}\tp2_predict:{}\n".format(p1_predict/data_size,p2_predict/data_size))
-    """
+            f.write("loss:{}".format(loss_sum))
+
 
 ##start main
 
