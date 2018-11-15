@@ -85,8 +85,8 @@ def loss_calc(predict,target):
     criterion = nn.CrossEntropyLoss()
     batch=predict.size(0)
     seq_len=predict.size(1)
-    predict=predict.view(batch*seq_len,-1)
-    target=target.view(-1)
+    predict=predict.contiguous().view(batch*seq_len,-1)
+    target=target.contiguous().view(-1)
     loss=criterion(predict,target)
     return loss
 
