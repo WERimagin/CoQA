@@ -81,6 +81,15 @@ def get_args():
 
     return args
 
+def loss_calc(predict,target):
+    criterion = nn.CrossEntropyLoss()
+    batch=predict.size(0)
+    seq_len=predict.size(1)
+    predict=predict.view(batch*seq_len,-1)
+    target=target.view(-1)
+    loss=criterion(predict,target)
+    return loss
+
 def model_handler(args,data,train=True):
     start=time.time()
     contexts_id=data["contexts_id"]
@@ -107,7 +116,7 @@ def model_handler(args,data,train=True):
         predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
         print(predict.size(),q_words.size())
         if train:
-            loss=criterion(predict,q_words)
+            loss=loss_calc(predict,q_words)#batch*seq_lenをして内部で計算
             loss.backward()
             optimizer.step()
             if i_batch%10==0:
@@ -152,7 +161,7 @@ else:
     print("cant use cuda")
 
 optimizer = optim.Adam(model.parameters(),lr=args.lr)
-criterion = nn.CrossEntropyLoss()
+
 
 for epoch in range(args.start_epoch,args.epoch_num):
     model_handler(args,train_data,True)
