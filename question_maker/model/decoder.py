@@ -29,7 +29,7 @@ class Decoder(nn.Module):
         embed=self.word_embed(input)#(batch,1,embed_size)
         output,hidden=self.gru(embed,self.hidden)#(batch,1,hidden_size)
         self.hidden=hidden
-        output=torch.squeeze(1)#(batch,hidden_size)
+        output=torch.squeeze(output,1)#(batch,hidden_size)
         attention_output=self.attention(output,encoder_output)#(batch,hidden_size*2)
 
         output=F.relu(self.attention_wight(torch.cat((output,attention_output),dim=-1)))#(batch,hidden_size*3)
