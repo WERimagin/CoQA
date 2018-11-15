@@ -119,17 +119,18 @@ def model_handler(args,data,train=True):
         #これからそれぞれを取り出し処理してモデルへ
         c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
         q_words=make_vec([questions_id[i] for i in batch])
+        a_words=make_vec([answers_id[i] for i in batch])
         if train:
             optimizer.zero_grad()
-        predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
+        predict=model(a_words,q_words,train=True)#(batch,seq_len,vocab_size)
         if train:
             loss=loss_calc(predict,q_words)#batch*seq_lenをして内部で計算
             loss.backward()
             optimizer.step()
-            if i_batch%100==0:
+            if i_batch%10==0:
                 with open("log.txt","a")as f:
                     now=time.time()
-                    f.write("epoch,{}\tbatch\t{}\ttime:{}\n".format(epoch,i_batch,now-start))
+                    f.write("epoch,{}\tbatch\t{}\tloss:{}\ttime:{}\n".format(epoch,i_batch,loss.data,now-start))
         else:
             predict_rate+=predict_calc(predict,q_words)
 
@@ -138,7 +139,7 @@ def model_handler(args,data,train=True):
             f.write("epoch:{}\ttime:{}\n".format(epoch,time.time()-start))
             torch.save(model.state_dict(), 'model/epoch_{}_model.pth'.format(epoch))
         else:
-            f.write("predict_rate:{}".format(predict_rate/data_size))
+            f.write("predict_rate:{}\n".format(predict_rate/data_size))
 
 
 ##start main
