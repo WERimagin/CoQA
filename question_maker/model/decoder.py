@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from func.utils import Word2Id,DataLoader,make_vec,make_vec_c,to_var
-from from question_maker.model.decoder import Attention
+from question_maker.model.attention import Attention
 
 class Decoder(nn.Module):
 
