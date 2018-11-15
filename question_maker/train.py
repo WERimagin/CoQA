@@ -70,7 +70,7 @@ def get_args():
     args = parser.parse_args()
     args.epoch_num=100
     args.train_batch_size=64
-    args.test_batch_size=4
+    args.test_batch_size=16
     args.hidden_size=100
     args.c_embed_size=20
     args.dropout=0.2
@@ -165,5 +165,7 @@ optimizer = optim.Adam(model.parameters(),lr=args.lr)
 
 for epoch in range(args.start_epoch,args.epoch_num):
     model_handler(args,train_data,True)
+    print("Hello")
     model_handler(args,train_data,False)
+    print("Hello")
     model_handler(args,test_data,False)
