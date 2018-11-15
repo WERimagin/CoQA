@@ -71,7 +71,7 @@ def get_args():
     parser.add_argument("--start_epoch", type=int, default="0", help="input model epoch")
     args = parser.parse_args()
     args.epoch_num=12
-    args.train_batch_size=16
+    args.train_batch_size=64
     args.test_batch_size=4
     args.hidden_size=100
     args.c_embed_size=20
@@ -114,14 +114,13 @@ def model_handler(args,data,train=True):
         if train:
             optimizer.zero_grad()
         predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
-        print(predict.size(),q_words.size())
         if train:
             loss=loss_calc(predict,q_words)#batch*seq_lenをして内部で計算
             loss.backward()
             optimizer.step()
             if i_batch%10==0:
                 now=time.time()
-                print(loss)
+                print(loss.item())
                 print("epoch,{}\tbatch\t{}\ttime:{}\n".format(epoch,i_batch,now-start))
     """
             if i_batch%500==0:
