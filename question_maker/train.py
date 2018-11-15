@@ -45,7 +45,7 @@ def data_loader(args,path,first=True):
 
     #data_size=len(contexts)
     if first:
-        data_size=128
+        data_size=1280
     else:
         data_size=len(contexts)
 
@@ -72,7 +72,7 @@ def get_args():
     parser.add_argument("--start_epoch", type=int, default="0", help="input model epoch")
     args = parser.parse_args()
     args.epoch_num=12
-    args.train_batch_size=64
+    args.train_batch_size=16
     args.test_batch_size=4
     args.hidden_size=100
     args.c_embed_size=20
