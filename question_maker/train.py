@@ -51,6 +51,8 @@ def data_loader(args,path,first=True):
 
     id2vec=np.array(id2vec)
 
+    print(len(answers))
+
     contexts_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in contexts[0:data_size]]
     questions_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in questions[0:data_size]]
     answers_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in answers[0:data_size]]
