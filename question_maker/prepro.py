@@ -58,6 +58,8 @@ def data_process(input_path,output_path,word_count,lower=True):
             context=tokenize(context_text).append("<eos>")
             #メモリサイズの確保のため、サイズが大きいcontextはスキップ
             #結果的に、87599個のcontextのうち、500をカット
+            print(context)
+            print(len(context))
             if len(context)>=350:
                 continue
             if word_count:
