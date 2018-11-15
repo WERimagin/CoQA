@@ -40,7 +40,7 @@ class Decoder(nn.Module):
     def forward(self,encoder_output,encoder_hidden,q_words):#input:(batch,seq_len),encoder_hidden:(seq_len,hidden_size*2),q_words:(batch,q_seq_len)
         batch_size=q_words.size(0)
         q_seq_len=q_words.size(1)
-        self.hidden=torch.add(encoder_hidden[0],encoder_hidden[1])
+        self.hidden=torch.unsqueeze(torch.add(encoder_hidden[0],encoder_hidden[1]),0)
         outputs=to_var(torch.from_numpy(np.zeros((q_seq_len,batch_size,self.vocab_size))))
         current_input=to_var(torch.from_numpy(np.zeros((batch_size,1),dtype="long")))#最初の隠れベクトル,<SOS>
 
