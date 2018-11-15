@@ -31,8 +31,9 @@ class Decoder(nn.Module):
         output=torch.squeeze(1)#(batch,hidden_size)
         attention_output=self.attention(output,encoder_output)#(batch,hidden_size*2)
 
-        output=self.out(F.relu(self.attention(torch.cat((output,attention_output),-1)))#(batch,vocab_size)
-        predict=torch.argmax(output,dim=-1)#(batch)
+        output=F.relu(self.attention(torch.cat((output,attention_output),-1))))#(batch,hidden_size*3)
+        output=self.out(output)#(batch,vocab_size)
+        predict=torch.argmax(output,dim=-1) #(batch)
         return output,predict
 
     def forward(self,encoder_output,encoder_hidden,q_words):#input:(batch,seq_len),encoder_hidden:(seq_len,hidden_size*2),q_words:(batch,q_seq_len)
