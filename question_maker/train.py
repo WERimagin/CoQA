@@ -104,7 +104,8 @@ def model_handler(args,data,train=True):
     contexts_id=data["contexts_id"]
     questions_id=data["questions_id"]
     answers_id=data["answers_id"]
-    data_size=len(contexts_id)
+    print(len(contexts_id),len(questions_id),len(answers_id))
+    data_size=len(answers_id)
     if train:
         batch_size=args.train_batch_size
         model.train()
