@@ -134,7 +134,7 @@ def model_handler(args,data,train=True):
         else:
             predict_rate+=predict_calc(predict,q_words)/predict.size(1)
             with open("log.txt","a")as f:
-                f.write("data_size:{}\tseq_size:{}\n".format(data_size,predict.size(1))
+                f.write("data_size:{}\tseq_size:{}\n".format(data_size,predict.size(1)))
 
     with open("log.txt","a")as f:
         if train:
