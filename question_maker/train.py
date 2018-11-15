@@ -138,7 +138,7 @@ def model_handler(args,data,train=True):
     with open("log.txt","a")as f:
         if train:
             f.write("epoch:{}\ttime:{}\n".format(epoch,time.time()-start))
-            torch.save(model.state_dict(), 'model/epoch_{}_model.pth'.format(epoch))
+            torch.save(model.state_dict(), 'model_data/epoch_{}_model.pth'.format(epoch))
         else:
             f.write("predict_rate:{}\n".format(predict_rate/data_size))
 
@@ -154,7 +154,7 @@ test_data=data_loader(args,"data/squad_test_data.json")
 model=Seq2Seq(args)
 
 if args.start_epoch>=1:
-    param = torch.load("model/epoch_{}_model.pth".format(args.start_epoch-1))
+    param = torch.load("model_data/epoch_{}_model.pth".format(args.start_epoch-1))
     model.load_state_dict(param)
 else:
     args.start_epoch=0
@@ -168,7 +168,5 @@ optimizer = optim.Adam(model.parameters(),lr=args.lr)
 
 for epoch in range(args.start_epoch,args.epoch_num):
     model_handler(args,train_data,True)
-    print("Hello")
     model_handler(args,train_data,False)
-    print("Hello")
     model_handler(args,test_data,False)
