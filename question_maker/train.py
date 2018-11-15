@@ -44,7 +44,10 @@ def data_loader(args,path,first=True):
         char2id=t["char2id"]
 
     #data_size=len(contexts)
-    data_size=640
+    if first:
+        data_size=640
+    else:
+        data_size=len(contexts)
 
     id2vec=np.array(id2vec)
 
