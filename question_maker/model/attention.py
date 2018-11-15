@@ -7,6 +7,7 @@ class Attention(nn.Module):
     def __init__(self, args):
         super(Attention, self).__init__()
 
+        self.hidden_size = args.hidden_size
         self.attention_wight=nn.Linear(self.hidden_size,self.hidden_size*2)
 
     def forward(self,input,encoder_output):#input:(batch,hidden_size),encoder_input:(batch,seq_len,hidden_size*2)
