@@ -109,6 +109,8 @@ def model_handler(args,data,train=True):
             loss=criterion(predict,q_words)
             loss.backward()
             optimizer.step()
+            if i_batch%10==0:
+                print(loss)
     """
             if i_batch%500==0:
                 with open("log.txt","a")as f:
