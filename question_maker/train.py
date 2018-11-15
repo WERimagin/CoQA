@@ -91,13 +91,19 @@ def loss_calc(predict,target):
     loss=criterion(predict,target)
     return loss
 
+def predict_calc(predict,target):
+    batch=predict.size(0)
+    seq_len=predict.size(1)
+    predict=predict.contiguous().view(batch*seq_len,-1)
+    target=target.contiguous().view(-1)
+    predict_rate=(torch.argmax(predict,dim=-1)==target).sum().item()
+    return predict_rate
+
 def model_handler(args,data,train=True):
     start=time.time()
     contexts_id=data["contexts_id"]
     questions_id=data["questions_id"]
     answers_id=data["answers_id"]
-    p1_predict=0
-    p2_predict=0
     data_size=len(contexts_id)
     if train:
         batch_size=args.train_batch_size
@@ -107,7 +113,7 @@ def model_handler(args,data,train=True):
         model.eval()
     dataloader=DataLoader(data_size,batch_size,train)
     batches=dataloader()
-    loss_sum=0
+    predict_rate=0
     for i_batch,batch in tqdm(enumerate(batches)):
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
@@ -125,14 +131,14 @@ def model_handler(args,data,train=True):
                     now=time.time()
                     f.write("epoch,{}\tbatch\t{}\ttime:{}\n".format(epoch,i_batch,now-start))
         else:
-            loss_sum+=loss
+            predict_rate+=predict_calc(predict,q_words)
 
     with open("log.txt","a")as f:
         if train:
             f.write("epoch:{}\ttime:{}\n".format(epoch,time.time()-start))
             torch.save(model.state_dict(), 'model/epoch_{}_model.pth'.format(epoch))
         else:
-            f.write("loss:{}".format(loss_sum))
+            f.write("predict_rate:{}".format(predict_rate/data_size))
 
 
 ##start main
