@@ -104,13 +104,15 @@ def model_handler(args,data,train=True):
         q_words=make_vec([questions_id[i] for i in batch])
         if train:
             optimizer.zero_grad()
-        output=model(c_words,train=True)#(batch,seq_len)
+        predict=model(c_words,train=True)#(batch,seq_len,vocab_size)
         if train:
             loss=criterion(predict,q_words)
             loss.backward()
             optimizer.step()
             if i_batch%10==0:
+                now=time.time()
                 print(loss)
+                print("epoch,{}\tbatch\t{}\ttime:{}\n".format(epoch,i_batch,now-start))
     """
             if i_batch%500==0:
                 with open("log.txt","a")as f:
