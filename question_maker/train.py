@@ -104,7 +104,8 @@ def model_handler(args,data,train=True):
         q_words=make_vec([questions_id[i] for i in batch])
         if train:
             optimizer.zero_grad()
-        predict=model(c_words,train=True)#(batch,seq_len,vocab_size)
+        predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
+        print(predict.size(),q_words.size())
         if train:
             loss=criterion(predict,q_words)
             loss.backward()

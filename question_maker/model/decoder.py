@@ -28,14 +28,14 @@ class Decoder(nn.Module):
         predict=torch.argmax(output,dim=-1)#(batch)
         return output,predict
 
-    def forward(self,input,encoder_hidden):#input:(batch,seq_len),encoder_hidden:(seq_len,hidden_size*2)
-        batch_size=input.size(0)
-        seq_len=input.size(1)
+    def forward(self,input,encoder_hidden,q_words):#input:(batch,seq_len),encoder_hidden:(seq_len,hidden_size*2),q_words:(batch,q_seq_len)
+        batch_size=q_words.size(0)
+        q_seq_len=q_words.size(1)
         self.hidden=encoder_hidden
-        outputs=to_var(torch.from_numpy(np.zeros((seq_len,batch_size,self.vocab_size))))
+        outputs=to_var(torch.from_numpy(np.zeros((q_seq_len,batch_size,self.vocab_size))))
+        current_input=to_var(torch.from_numpy(np.zeros((batch_size,1),dtype="long")))#最初の隠れベクトル,<SOS>
 
-        current_input=to_var(torch.from_numpy(np.zeros((batch_size,1),dtype="long")))
-        for i in range(seq_len):#(batch,1)
+        for i in range(q_seq_len):#(batch,1)
             output,predict=self.decode_step(current_input)#(batch,vocab_size)(batch)
             current_input=predict.view(-1,1)
             outputs[i]=output
