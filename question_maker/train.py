@@ -134,6 +134,7 @@ def model_handler(args,data,train=True):
                     f.write("epoch,{}\tbatch\t{}\tloss:{}\ttime:{}\n".format(epoch,i_batch,loss.data,now-start))
         else:
             predict_rate+=predict_calc(predict,q_words)/predict.size(1)
+            print(data_size,predict.size(1))
 
     with open("log.txt","a")as f:
         if train:
