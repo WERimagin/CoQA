@@ -44,10 +44,7 @@ def data_loader(args,path,first=True):
         char2id=t["char2id"]
 
     #data_size=len(contexts)
-    if first:
-        data_size=64
-    else:
-        data_size=len(contexts)
+    data_size=640
 
     id2vec=np.array(id2vec)
 
@@ -72,7 +69,7 @@ def get_args():
     parser.add_argument("--start_epoch", type=int, default="0", help="input model epoch")
     args = parser.parse_args()
     args.epoch_num=100
-    args.train_batch_size=16
+    args.train_batch_size=64
     args.test_batch_size=4
     args.hidden_size=100
     args.c_embed_size=20
