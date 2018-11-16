@@ -16,4 +16,4 @@ module load openmpi
 #実行
 source ../imagin/bin/activate
 export PYTHONPATH=/home/6/15B06641/CoQA
-python3 train.py
+python3 question_maker/train.py
