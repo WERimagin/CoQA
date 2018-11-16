@@ -44,7 +44,7 @@ class Decoder(nn.Module):
         outputs=to_var(torch.from_numpy(np.zeros((q_seq_len,batch_size,self.vocab_size))))
         current_input=to_var(torch.from_numpy(np.zeros((batch_size,1),dtype="long")))#最初の隠れベクトル,<SOS>
 
-        for i in range(q_seq_len)
+        for i in range(q_seq_len):
             output,predict=self.decode_step(current_input,encoder_output)#(batch,vocab_size),(batch)
             current_input=predict.view(-1,1)#(batch,1)
             outputs[i]=output
