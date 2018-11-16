@@ -136,7 +136,7 @@ def model_handler(args,data,train=True):
             batch=predict.size(0)
             seq_len=predict.size(1)
             predict=predict.contiguous().view(batch*seq_len,-1)
-            predict_word=torch.argmax(predict,dim=-1).view(batch,seq_len).item()
+            predict_word=torch.argmax(predict,dim=-1).view(batch,seq_len).tolist()
             with open("log.txt","a")as f:
                 for sentence in predict_word:
                     f.write(" ".join([id2word for id in sentence]))
