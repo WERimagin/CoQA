@@ -139,7 +139,7 @@ def model_handler(args,data,train=True):
             predict_word=torch.argmax(predict,dim=-1).view(batch,seq_len).tolist()
             with open("log.txt","a")as f:
                 for sentence in predict_word:
-                    f.write(" ".join([id2word for id in sentence]))
+                    f.write(" ".join([id2word[id] for id in sentence]))
 
 
     with open("log.txt","a")as f:
