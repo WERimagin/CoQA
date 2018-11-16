@@ -45,13 +45,12 @@ def data_loader(args,path,first=True):
 
     #data_size=len(contexts)
     if first:
-        data_size=320
+        data_size=len(contexts)
     else:
         data_size=len(contexts)
 
     id2vec=np.array(id2vec)
-
-    print(len(answers))
+    id2word={i:w for w,i in word2id.items()}
 
     contexts_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in contexts[0:data_size]]
     questions_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in questions[0:data_size]]
@@ -67,11 +66,11 @@ def data_loader(args,path,first=True):
         args.vocab_size=id2vec.shape[0]
         args.embed_size=id2vec.shape[1]
 
-    return data
+    return data,id2word
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--start_epoch", type=int, default="0", help="input model epoch")
+    parser.add_argument("--load_epoch", type=int, default="0", help="input model epoch")
     args = parser.parse_args()
     args.epoch_num=20
     args.train_batch_size=16
@@ -134,13 +133,19 @@ def model_handler(args,data,train=True):
                     now=time.time()
                     f.write("epoch,{}\tbatch\t{}\tloss:{}\ttime:{}\n".format(epoch,i_batch,loss.data,now-start))
         else:
-            predict_rate+=predict_calc(predict,q_words)/predict.size(1)
+            batch=predict.size(0)
+            seq_len=predict.size(1)
+            predict=predict.contiguous().view(batch*seq_len,-1)
+            predict_word=torch.argmax(predict,dim=-1).view(batch,seq_len).item()
+            with open("log.txt","a")as f:
+                for sentence in predict_word:
+                    f.write(" ".join([id2word for id in sentence]))
 
 
     with open("log.txt","a")as f:
         if train:
             f.write("epoch:{}\ttime:{}\n".format(epoch,time.time()-start))
-            torch.save(model.state_dict(), 'model_data/epoch_{}_model.pth'.format(epoch))
+            #torch.save(model.state_dict(), 'model_data/epoch_{}_model.pth'.format(epoch))
         else:
             f.write("predict_rate:{}\n".format(predict_rate/data_size))
 
@@ -149,17 +154,14 @@ def model_handler(args,data,train=True):
 
 args=get_args()
 
-train_data=data_loader(args,"data/squad_train_data.json",first=True)
-test_data=data_loader(args,"data/squad_test_data.json")
+train_data,id2word=data_loader(args,"data/squad_train_data.json",first=True)
+test_data,_=data_loader(args,"data/squad_test_data.json")
 
 
 model=Seq2Seq(args)
+param = torch.load("model_data/epoch_{}_model.pth".format(args.load_epoch))
+model.load_state_dict(param)
 
-if args.start_epoch>=1:
-    param = torch.load("model_data/epoch_{}_model.pth".format(args.start_epoch-1))
-    model.load_state_dict(param)
-else:
-    args.start_epoch=0
 if torch.cuda.is_available():
     model.cuda()
 else:
@@ -167,8 +169,5 @@ else:
 
 optimizer = optim.Adam(model.parameters(),lr=args.lr)
 
-
-for epoch in range(args.start_epoch,args.epoch_num):
-    model_handler(args,train_data,True)
-    model_handler(args,train_data,False)
-    model_handler(args,test_data,False)
+model_handler(args,train_data,False)
+model_handler(args,test_data,False)
