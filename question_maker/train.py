@@ -8,15 +8,15 @@
 #3.モデルに入れてp1,p2(スタート位置、エンド位置を出力)
 #4.predictはp1,p2それぞれのargmaxを取り、それと正解の位置を比較して出力する
 
-
+import warnings
+warnings.filterwarnings('ignore')
 import sys
 sys.path.append("../")
 from tqdm import tqdm
 import nltk
 import pickle
 import json
-import warnings
-warnings.filterwarnings('ignore')
+
 import numpy as np
 import argparse
 import torch
