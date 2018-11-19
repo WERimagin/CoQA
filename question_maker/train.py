@@ -46,7 +46,7 @@ def data_loader(args,path,first=True):
 
     #data_size=len(contexts)
     if first:
-        data_size=len(questions)
+        data_size=64
     else:
         data_size=len(questions)
 
