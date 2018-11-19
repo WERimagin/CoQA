@@ -120,6 +120,7 @@ def model_handler(args,data,train=True):
     start=time.time()
     questions_id=data["questions_id"]
     sentences_id=data["sentences_id"]
+    contexts_id=data["contexts_id"]
     data_size=len(questions_id)
     if train:
         batch_size=args.train_batch_size
@@ -133,7 +134,8 @@ def model_handler(args,data,train=True):
     for i_batch,batch in tqdm(enumerate(batches)):
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
-        c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
+        #c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
+        c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
         q_words=make_vec([questions_id[i] for i in batch])
         if train:
             optimizer.zero_grad()
