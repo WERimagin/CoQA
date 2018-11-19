@@ -49,6 +49,7 @@ def data_loader(args,path,first=True):
         data_size=64
     else:
         data_size=len(questions)
+        print(data_size)
 
     id2vec=np.array(id2vec)
 
