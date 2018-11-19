@@ -107,7 +107,7 @@ def predict_calc(predict,target):
         target=target.contiguous().view(-1)
         predict_rate=(torch.argmax(predict,dim=-1)==target).sum().item()
         return predict_rate
-    elif type=="bleu"
+    elif type=="bleu":
         predict=torch.argmax(predict,dim=-1).tolist()#(batch,seq_len,embed_size)
         target=target.tolist()#(batch,seq_len)
         predict_sum=0
