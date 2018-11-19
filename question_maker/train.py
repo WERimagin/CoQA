@@ -108,7 +108,7 @@ def model_handler(args,data,train=True):
     start=time.time()
     questions_id=data["questions_id"]
     sentences_id=data["sentences_id"]
-    data_size=len(answers_id)
+    data_size=len(questions_id)
     if train:
         batch_size=args.train_batch_size
         model.train()
