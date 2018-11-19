@@ -183,6 +183,6 @@ optimizer = optim.Adam(model.parameters(),lr=args.lr)
 
 for epoch in range(args.start_epoch,args.epoch_num):
     print("start")
-    model_handler(args,train_data,True)
-    model_handler(args,train_data,False)
-    model_handler(args,test_data,False)
+    model_handler(args,train_data,first=True)
+    model_handler(args,train_data,first=False)
+    model_handler(args,test_data,first=False)
