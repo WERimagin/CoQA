@@ -7,7 +7,7 @@ import gzip
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import nltk
+from nltk.tokenize import word_tokenize,sent_tokenize
 import pickle
 import collections
 
@@ -34,7 +34,24 @@ def c2wpointer(context_text,context,answer_start,answer_end):#answer_start,end�
 
 #sentenceを受け取り、tokenizeして返す
 def tokenize(sent):
-    return [token.replace('``','"').replace("''",'"') for token in nltk.word_tokenize(sent)]
+    return [token.replace('``','"').replace("''",'"') for token in word_tokenize(sent)]
+
+#context_textを文分割して、answer_start~answer_end(char単位)のスパンが含まれる文を返す
+#やってることはc2iと多分同じアルゴリズう
+def answer_find(context_text,answer_start,answer_end):
+    context=sent_tokenize(context_text)
+    current_p=0
+    for i,sent in enumerate(context):
+        end_p=current_p+len(sent)
+        if current_p<=answer_start and answer_start<=end_p:
+            sent_start_id=i
+        if current_p<=answer_end and answer_end<=end_p:
+            sent_end_id=i
+        current_p+=len(sent)+1#スペースが消えている分の追加、end_pの計算のところでするべきかは不明
+
+    answer_sent=word_tokenize(" ".join(context[sent_start_id:sent_end_id+1]))
+    return answer_sent
+
 
 def data_process(input_path,output_path,word_count,lower=True):
     with open(input_path,"r") as f:
@@ -45,6 +62,7 @@ def data_process(input_path,output_path,word_count,lower=True):
     answer_ends=[]
     answer_texts=[]
     answers=[]
+    sentences=[]
     ids=[]
     word2count=collections.Counter()
     char2count=collections.Counter()
@@ -87,12 +105,15 @@ def data_process(input_path,output_path,word_count,lower=True):
                 a=qas["answers"][0]
                 answer_start=a["answer_start"]
                 answer_end=a["answer_start"]+len(a["text"])
-                answer_start,answer_end=c2wpointer(context_text,context,answer_start,answer_end)
                 answer=tokenize(a["text"])
                 answer.append("<eos>")
+                answer_sent=answer_find(context_text,answer_start,answer_end)#contextの中からanswerが含まれる文を見つけ出す
+                answer_sent.append("<eos>")
+                answer_start,answer_end=c2wpointer(context_text,context,answer_start,answer_end)
                 answer_starts.append(answer_start)
                 answer_ends.append(answer_end)
                 answers.append(answer)
+                sentences.append(answer_sent)
 
     with open(output_path,"w")as f:
         t={"contexts":contexts,
@@ -100,6 +121,7 @@ def data_process(input_path,output_path,word_count,lower=True):
             "answer_starts":answer_starts,
             "answer_ends":answer_ends,
             "answers":answers,
+            "sentences":sentences,
             "ids":ids}
         json.dump(t,f)
 
