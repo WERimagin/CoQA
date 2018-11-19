@@ -61,7 +61,7 @@ def data_loader(args,path,first=True):
 
     id2word={i:w for w,i in word2id.items()}
 
-    for i in range(0:10):
+    for i in range(10):
         answer=[id2word[j] for j in answers_id[i]]
         sentence=[id2word[j] for j in sentences_id[i]]
         print(answer,sentence)
