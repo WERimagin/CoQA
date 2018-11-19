@@ -28,7 +28,7 @@ from torch.autograd import Variable
 import time
 from question_maker.model.seq2seq import Seq2Seq
 from func.utils import Word2Id,DataLoader,make_vec,make_vec_c,to_var
-from nltk.translate import bleu_score
+import nltk
 
 
 def data_loader(args,path,first=True):
@@ -97,12 +97,25 @@ def loss_calc(predict,target):
     return loss
 
 def predict_calc(predict,target):
-    batch=predict.size(0)
-    seq_len=predict.size(1)
-    predict=predict.contiguous().view(batch*seq_len,-1)
-    target=target.contiguous().view(-1)
-    predict_rate=(torch.argmax(predict,dim=-1)==target).sum().item()
-    return predict_rate
+    #predict:(batch,seq_len,embed_size)
+    #target:(batch,seq_len)
+    type="bleu"
+    if type=="normal":
+        batch=predict.size(0)
+        seq_len=predict.size(1)
+        predict=predict.contiguous().view(batch*seq_len,-1)
+        target=target.contiguous().view(-1)
+        predict_rate=(torch.argmax(predict,dim=-1)==target).sum().item()
+        return predict_rate
+    elif type=="bleu"
+        predict=torch.argmax(predict,dim=-1).tolist()#(batch,seq_len,embed_size)
+        target=target.tolist()#(batch,seq_len)
+        predict_sum=0
+        for p,t in zip(predict,target):#batchごと
+            predict_sum+=nltk.blue_score.sentence_bleu(p,t)
+        return predict_sum
+
+
 
 def model_handler(args,data,train=True):
     start=time.time()
@@ -135,8 +148,7 @@ def model_handler(args,data,train=True):
                     now=time.time()
                     f.write("epoch,{}\tbatch\t{}\tloss:{}\ttime:{}\n".format(epoch,i_batch,loss.data,now-start))
         else:
-            predict_rate+=predict_calc(predict,q_words)/predict.size(1)
-
+            predict_rate+=predict_calc(predict,q_words)
 
     with open("log.txt","a")as f:
         if train:
@@ -167,7 +179,6 @@ else:
     print("cant use cuda")
 
 optimizer = optim.Adam(model.parameters(),lr=args.lr)
-
 
 for epoch in range(args.start_epoch,args.epoch_num):
     model_handler(args,train_data,True)
