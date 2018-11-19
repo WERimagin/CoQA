@@ -46,19 +46,18 @@ def data_loader(args,path,first=True):
 
     #data_size=len(contexts)
     if first:
-        data_size=64
+        data_size=len(questions)
     else:
         data_size=len(questions)
-        print(data_size)
 
     id2vec=np.array(id2vec)
 
     print(len(answers))
 
-    contexts_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in contexts[0:data_size]]
-    questions_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in questions[0:data_size]]
-    answers_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in answers[0:data_size]]
-    sentences_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in sentences[0:data_size]]
+    contexts_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in contexts[0:data_size]]
+    questions_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in questions[0:data_size]]
+    answers_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in answers[0:data_size]]
+    sentences_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in sentences[0:data_size]]
 
     data={"contexts_id":contexts_id,
         "questions_id":questions_id,
@@ -114,7 +113,6 @@ def predict_calc(predict,target):
         predict_sum=0
         for p,t in zip(predict,target):#batchごと
             predict_sum+=nltk.bleu_score.sentence_bleu([p],t)
-        print(predict_sum)
         return predict_sum
 
 
