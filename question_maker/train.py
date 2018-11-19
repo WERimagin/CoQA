@@ -164,7 +164,7 @@ def model_handler(args,data,train=True):
 args=get_args()
 
 train_data=data_loader(args,"data/squad_train_data.json",first=True)
-test_data=data_loader(args,"data/squad_test_data.json")
+test_data=data_loader(args,"data/squad_test_data.json",first=False)
 
 
 model=Seq2Seq(args)
@@ -183,6 +183,6 @@ optimizer = optim.Adam(model.parameters(),lr=args.lr)
 
 for epoch in range(args.start_epoch,args.epoch_num):
     print("start")
-    model_handler(args,train_data,first=True)
-    model_handler(args,train_data,first=False)
-    model_handler(args,test_data,first=False)
+    model_handler(args,train_data,True)
+    model_handler(args,train_data,False)
+    model_handler(args,test_data,False)
