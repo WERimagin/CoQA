@@ -112,9 +112,9 @@ def predict_calc(predict,target):
         target=target.tolist()#(batch,seq_len)
         predict_sum=0
         for p,t in zip(predict,target):#batchごと
-            predict_sum+=nltk.blue_score.sentence_bleu(p,t)
+            predict_sum+=nltk.bleu_score.sentence_bleu([p],t)
+        print(predict_sum)
         return predict_sum
-
 
 
 def model_handler(args,data,train=True):
