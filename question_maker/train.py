@@ -77,7 +77,7 @@ def get_args():
     parser.add_argument("--start_epoch", type=int, default="0", help="input model epoch")
     args = parser.parse_args()
     args.epoch_num=20
-    args.train_batch_size=16
+    args.train_batch_size=64
     args.test_batch_size=16
     args.hidden_size=100
     args.c_embed_size=20
