@@ -142,7 +142,8 @@ def model_handler(args,data,train=True):
         #c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
         c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
         q_words=make_vec([questions_id[i] for i in batch])
-        print(c_words.size(),q_words_size())
+        print(c_words.size(),q_words.size())
+        print(c_words,q_words)
         if train:
             optimizer.zero_grad()
         predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)

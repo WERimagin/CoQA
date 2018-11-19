@@ -18,5 +18,5 @@ class Encoder(nn.Module):
 
     def forward(self,input):#input:(batch,seq_len)
         embed = self.word_embed(input)#(batch,seq_len,embed_size)
-        output, hidden = self.gru(embed)#(batch,seq_len,hidden_size*2),(1,batch,hidden_size*2)
+        output, hidden = self.gru(embed)#(batch,seq_len,hidden_size*2),(2,batch,hidden_size*2)
         return output, hidden
