@@ -125,6 +125,7 @@ def model_handler(args,data,train=True):
     questions_id=data["questions_id"]
     sentences_id=data["sentences_id"]
     contexts_id=data["contexts_id"]
+
     data_size=len(questions_id)
     if train:
         batch_size=args.train_batch_size
@@ -141,6 +142,7 @@ def model_handler(args,data,train=True):
         #c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
         c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
         q_words=make_vec([questions_id[i] for i in batch])
+        print(c_words.size(),q_words_size())
         if train:
             optimizer.zero_grad()
         predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
