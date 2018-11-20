@@ -137,7 +137,8 @@ def model_handler(args,data,train=True):
     batches=dataloader()
     predict_rate=0
     for i_batch,batch in tqdm(enumerate(batches)):
-        #batch[0]=87063
+        if i_batch==2:
+            batch[0]=87063
         print(batch)
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
