@@ -67,7 +67,7 @@ def to_var(x):
     if torch.cuda.is_available():
         x = x.cuda()
     """
-    device=torch.device("cuda:3" if torch cuda.is_available() else "cpu")
+    device=torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
     x=x.to(device)
     return Variable(x)
 

@@ -196,7 +196,7 @@ else:
     print("cant use cuda")
 """
 #pytorch0.4より、OpenNMT参考
-device=torch.device("cuda:3" if torch cuda.is_available() else "cpu")
+device=torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
 optimizer = optim.Adam(model.parameters(),lr=args.lr)
