@@ -147,8 +147,8 @@ def model_handler(args,data,train=True):
         predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
         if train:
             loss=loss_calc(predict,q_words)#batch*seq_lenをして内部で計算
-            #loss.backward()
-            #optimizer.step()
+            loss.backward()
+            optimizer.step()
             if i_batch%10==0:
                 with open("log.txt","a")as f:
                     now=time.time()
