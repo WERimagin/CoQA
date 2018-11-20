@@ -59,7 +59,11 @@ def data_loader(args,path,first=True):
     answers_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in answers[0:data_size]]
     sentences_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in sentences[0:data_size]]
 
-    #id2word={i:w for w,i in word2id.items()}
+    id2word={i:w for w,i in word2id.items()}
+
+    print(sentences[87063])
+    print(sentences_id[87063])
+    print([id2word(i) for i in sentences_id[87063]])
 
 
 
