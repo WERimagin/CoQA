@@ -61,9 +61,10 @@ def data_loader(args,path,first=True):
 
     id2word={i:w for w,i in word2id.items()}
 
-    print(sentences[87063])
-    print(sentences_id[87063])
-    print([id2word[i] for i in sentences_id[87063]])
+    if first:
+        print(sentences[87063])
+        print(sentences_id[87063])
+        print([id2word[i] for i in sentences_id[87063]])
 
 
 
@@ -142,10 +143,7 @@ def model_handler(args,data,train=True):
     batches=dataloader()
     predict_rate=0
     for i_batch,batch in tqdm(enumerate(batches)):
-        if i_batch==10:
-            batch[0]=87060
-        elif i_batch==20:
-            batch[0]=87063
+        batch[0]=87058+i
         print(batch)
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
