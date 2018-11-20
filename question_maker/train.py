@@ -46,7 +46,7 @@ def data_loader(args,path,first=True):
 
     #data_size=len(contexts)
     if first:
-        data_size=len(questions)
+        data_size=640
     else:
         data_size=len(questions)
 
@@ -60,6 +60,7 @@ def data_loader(args,path,first=True):
     sentences_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in sentences[0:data_size]]
 
     #id2word={i:w for w,i in word2id.items()}
+
 
 
 
@@ -142,6 +143,8 @@ def model_handler(args,data,train=True):
         c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
         #c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
         q_words=make_vec([questions_id[i] for i in batch])
+        with open("log.txt","a") as f:
+            f.write(c_words.size(),q_words.size())
         if train:
             optimizer.zero_grad()
         predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
