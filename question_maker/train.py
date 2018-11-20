@@ -60,7 +60,7 @@ def data_loader(args,path,first=True):
     sentences_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in sentences[0:data_size]]
 
     #id2word={i:w for w,i in word2id.items()}
-
+    print(len(questions),len(sentences))
     print(questions[87063],sentences[87063])
     print(questions_id[87063],sentences_id[87063])
 
