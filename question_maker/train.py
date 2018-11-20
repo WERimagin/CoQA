@@ -88,6 +88,7 @@ def get_args():
     args.dropout=0.2
     args.self_attention=True
     args.lr=0.001
+    args.gpu_num=3
 
     return args
 
@@ -188,7 +189,7 @@ if args.start_epoch>=1:
 else:
     args.start_epoch=0
 if torch.cuda.is_available():
-    model.cuda()
+    model.cuda(gpu_num)
 else:
     print("cant use cuda")
 
