@@ -141,7 +141,7 @@ def model_handler(args,data,train=True):
         if i_batch==10:
             batch[0]=87060
         elif i_batch==20:
-            batch[0]=86063
+            batch[0]=87063
         print(batch)
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
@@ -196,7 +196,7 @@ else:
     print("cant use cuda")
 """
 #pytorch0.4より、OpenNMT参考
-device=torch.device("cuda:3")
+device=torch.device("cuda:3" if torch cuda.is_available() else "cpu")
 model.to(device)
 
 optimizer = optim.Adam(model.parameters(),lr=args.lr)
