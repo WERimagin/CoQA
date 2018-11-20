@@ -63,7 +63,7 @@ def data_loader(args,path,first=True):
 
     print(sentences[87063])
     print(sentences_id[87063])
-    print([id2word(i) for i in sentences_id[87063]])
+    print([id2word[i] for i in sentences_id[87063]])
 
 
 
