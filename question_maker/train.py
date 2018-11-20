@@ -138,17 +138,15 @@ def model_handler(args,data,train=True):
     batches=dataloader()
     predict_rate=0
     for i_batch,batch in tqdm(enumerate(batches)):
-        """
         if i_batch==10:
             batch[0]=87060
         elif i_batch==20:
             batch[0]=87063
-        """
         print(batch)
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
-        #c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
-        c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
+        c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
+        #c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
         q_words=make_vec([questions_id[i] for i in batch])
         with open("log.txt","a")as f:
             f.write(" ".join([str(w) for w in batch]))
