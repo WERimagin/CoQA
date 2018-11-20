@@ -1,5 +1,6 @@
 #SQuADのデータ処理
 
+import os
 import sys
 sys.path.append("../")
 import json
@@ -129,10 +130,11 @@ def data_process(input_path,output_path,word_count,lower=True):
         #<pad>:0,<unk>:1,<eos>:2
         #pad:padding用,unk:unknownトークン,eos:End of Sentence
 
-        word2id={w:i for i,(w,count) in enumerate(word2count.items(),3) if count>=0}
+        word2id={w:i for i,(w,count) in enumerate(word2count.items(),2) if count>=0}
         word2id["<pad>"]=0
         word2id["<unk>"]=1
-        word2id["<eos>"]=2
+        #word2id["<eos>"]=2
+        #これを辞書に入れてはいけない。文の一部として使っているため。contextで問題がない理由は謎。
         char2id={c:i for i,(c,count) in enumerate(char2count.items(),2) if count>=0}
         char2id["<eos>"]=0
         char2id["<unk>"]=1
@@ -140,6 +142,7 @@ def data_process(input_path,output_path,word_count,lower=True):
 
 
 def vec_process(contexts,word2id,char2id):
+
     vec_size=100
 
     #vec==300は単語が空白で区切られているものがあり、要対処
@@ -147,17 +150,19 @@ def vec_process(contexts,word2id,char2id):
             path="data/glove.840B.300d.txt"
     else:
         path="data/glove.6B.{}d.txt".format(vec_size)
+
     w2vec={}
     id2vec=np.zeros((len(list(word2id.items())),vec_size))
 
-    with open(path,"r")as f:
-        for line in tqdm(f):
-            line_split=line.split()
-            w2vec[line_split[0]]=[float(i) if i!="." else float(0)  for i in line_split[1:]]
+    if os.path.exists(path)==True:
+        with open(path,"r")as f:
+            for line in tqdm(f):
+                line_split=line.split()
+                w2vec[line_split[0]]=[float(i) if i!="." else float(0)  for i in line_split[1:]]
 
-    for w,i in word2id.items():
-        if w.lower() in w2vec:
-            id2vec[i]=w2vec[w.lower()]
+        for w,i in word2id.items():
+            if w.lower() in w2vec:
+                id2vec[i]=w2vec[w.lower()]
 
 
 

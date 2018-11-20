@@ -61,12 +61,6 @@ def data_loader(args,path,first=True):
 
     id2word={i:w for w,i in word2id.items()}
 
-    if first:
-        print(sentences[87063])
-        print(sentences_id[87063])
-        print([id2word[i] for i in sentences_id[87063]])
-
-
 
     data={"contexts_id":contexts_id,
         "questions_id":questions_id,
@@ -143,8 +137,6 @@ def model_handler(args,data,train=True):
     batches=dataloader()
     predict_rate=0
     for i_batch,batch in tqdm(enumerate(batches)):
-        batch[0]=87058+i_batch
-        print(batch)
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
         c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
@@ -158,8 +150,8 @@ def model_handler(args,data,train=True):
         predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
         if train:
             loss=loss_calc(predict,q_words)#batch*seq_lenをして内部で計算
-            loss.backward()
-            optimizer.step()
+            #loss.backward()
+            #optimizer.step()
             if i_batch%10==0:
                 with open("log.txt","a")as f:
                     now=time.time()
