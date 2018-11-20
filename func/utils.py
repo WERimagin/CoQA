@@ -63,8 +63,12 @@ class DataLoader:#使うデータをまとめてシャッフル、batch単位に
         return batches
 
 def to_var(x):
+    """
     if torch.cuda.is_available():
-        x = x.cuda(3)
+        x = x.cuda()
+    """
+    device=torch.device("cuda:0")
+    x=x.to(device)
     return Variable(x)
 
 def make_vec(sentences):

@@ -188,10 +188,16 @@ if args.start_epoch>=1:
     model.load_state_dict(param)
 else:
     args.start_epoch=0
+
+"""
 if torch.cuda.is_available():
     model.cuda(3)
 else:
     print("cant use cuda")
+"""
+#pytorch0.4より、OpenNMT参考
+device=torch.device("cuda:0")
+model.to(device)
 
 optimizer = optim.Adam(model.parameters(),lr=args.lr)
 
