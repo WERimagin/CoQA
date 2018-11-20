@@ -64,7 +64,7 @@ class DataLoader:#使うデータをまとめてシャッフル、batch単位に
 
 def to_var(x):
     if torch.cuda.is_available():
-        x = x.cuda(gpu_num)
+        x = x.cuda(3)
     return Variable(x)
 
 def make_vec(sentences):
