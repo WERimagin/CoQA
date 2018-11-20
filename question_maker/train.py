@@ -142,9 +142,6 @@ def model_handler(args,data,train=True):
         c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
         #c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
         q_words=make_vec([questions_id[i] for i in batch])
-        with open("log.txt","a")as f:
-            f.write(" ".join([str(w) for w in batch]))
-            f.write("c:{}\tq:{}\n".format(c_words.size(),q_words.size()))
         if train:
             optimizer.zero_grad()
         predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
