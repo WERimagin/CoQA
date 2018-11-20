@@ -47,8 +47,7 @@ class DataLoader:#使うデータをまとめてシャッフル、batch単位に
         self.data_size=data_size
         self.batch_size=batch_size
         self.data=list(range(self.data_size))
-        #self.shuffle=shuffle
-        self.shuffle=False
+        self.shuffle=shuffle
     def __call__(self):
         if self.shuffle:
             random.shuffle(self.data)
