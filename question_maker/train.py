@@ -189,7 +189,7 @@ if args.start_epoch>=1:
 else:
     args.start_epoch=0
 if torch.cuda.is_available():
-    model.cuda(gpu_num)
+    model.cuda(3)
 else:
     print("cant use cuda")
 
