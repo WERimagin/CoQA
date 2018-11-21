@@ -45,10 +45,7 @@ def data_loader(args,path,first=True):
         char2id=t["char2id"]
 
     #data_size=len(contexts)
-    if first:
-        data_size=len(questions)
-    else:
-        data_size=len(questions)
+    data_size=160
 
     id2vec=np.array(id2vec)
 
@@ -61,7 +58,7 @@ def data_loader(args,path,first=True):
 
     id2word={i:w for w,i in word2id.items()}
 
-    
+
 
 
     data={"contexts_id":contexts_id,
@@ -161,7 +158,7 @@ def model_handler(args,data,train=True):
     with open("log.txt","a")as f:
         if train:
             f.write("epoch:{}\ttime:{}\n".format(epoch,time.time()-start))
-            torch.save(model.state_dict(), 'model_data/epoch_{}_model.pth'.format(epoch))
+            torch.save(model.state_dict(), 'model_data_exp/epoch_{}_model.pth'.format(epoch))
         else:
             f.write("predict_rate:{}\n".format(predict_rate/data_size))
 

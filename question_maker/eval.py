@@ -72,7 +72,7 @@ def data_loader(args,path,first=True):
         args.vocab_size=id2vec.shape[0]
         args.embed_size=id2vec.shape[1]
 
-    return data
+    return data,id2word
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -122,7 +122,7 @@ def model_handler(args,data,train=True):
     questions_id=data["questions_id"]
     sentences_id=data["sentences_id"]
     contexts_id=data["contexts_id"]
-    data_size=len(answers_id)
+    data_size=len(questions_id)
     if train:
         batch_size=args.train_batch_size
         model.train()
@@ -140,7 +140,7 @@ def model_handler(args,data,train=True):
         q_words=make_vec([questions_id[i] for i in batch])
         if train:
             optimizer.zero_grad()
-        predict=model(a_words,q_words,train=True)#(batch,seq_len,vocab_size)
+        predict=model(c_words,q_words,train=True)#(batch,seq_len,vocab_size)
         if train:
             loss=loss_calc(predict,q_words)#batch*seq_lenをして内部で計算
             loss.backward()
@@ -154,9 +154,11 @@ def model_handler(args,data,train=True):
             seq_len=predict.size(1)
             predict=predict.contiguous().view(batch*seq_len,-1)
             predict_word=torch.argmax(predict,dim=-1).view(batch,seq_len).tolist()
+            target_word=q_words.tolist()
             with open("log.txt","a")as f:
-                for sentence in predict_word:
-                    f.write("{}\n".format(" ".join([id2word[id] for id in sentence])))
+                for pre,tar in zip(predict_word,target_word):
+                    f.write("predict:{}\n".format(" ".join([id2word[id] for id in pre])))
+                    f.write("target:{}\n".format(" ".join([id2word[id] for id in tar])))
 
 
     with open("log.txt","a")as f:
