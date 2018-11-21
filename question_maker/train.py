@@ -91,7 +91,7 @@ def get_args():
     return args
 
 def loss_calc(predict,target):
-    criterion = nn.CrossEntropyLoss(ignore_index=0)#<pad>=0を無視
+    criterion = nn.CrossEntropyLoss()#<pad>=0を無視
     batch=predict.size(0)
     seq_len=predict.size(1)
     predict=predict.contiguous().view(batch*seq_len,-1)
