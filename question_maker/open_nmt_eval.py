@@ -24,6 +24,12 @@ with open(pred_path)as f:
 target=[word_tokenize(sent) for sent in target]
 predict=[word_tokenize(sent) for sent in predict]
 
+for i in range(0:10):
+    t=target[i]
+    p=predict[i]
+    print(t,p)
+    print(sentence_bleu([t],p))
+
 
 score_sum=0
 for t,p in tqdm(zip(target,predict)):
