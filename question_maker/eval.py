@@ -182,10 +182,8 @@ model=Seq2Seq(args)
 param = torch.load("model_data_exp/epoch_{}_model.pth".format(args.load_epoch))
 model.load_state_dict(param)
 
-if torch.cuda.is_available():
-    model.cuda()
-else:
-    print("cant use cuda")
+device=torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+model.to(device)
 
 optimizer = optim.Adam(model.parameters(),lr=args.lr)
 
