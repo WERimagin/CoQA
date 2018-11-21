@@ -70,7 +70,7 @@ def data_loader(args,path,first=True):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--load_epoch", type=int, default="5", help="input model epoch")
+    parser.add_argument("--load_epoch", type=int, default="10", help="input model epoch")
     args = parser.parse_args()
     args.epoch_num=20
     args.train_batch_size=16
