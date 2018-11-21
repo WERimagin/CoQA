@@ -159,8 +159,9 @@ test_data,_=data_loader(args,"data/squad_test_data.json")
 
 
 model=Seq2Seq(args)
-param = torch.load("model_data/epoch_{}_model.pth".format(args.load_epoch))
-model.load_state_dict(param)
+
+#param = torch.load("model_data/epoch_{}_model.pth".format(args.load_epoch))
+#model.load_state_dict(param)
 
 if torch.cuda.is_available():
     model.cuda()
