@@ -85,9 +85,6 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
                 question_text=qas["question"]
                 if len(qas["answers"])==0:
                     continue
-
-
-
                 a=qas["answers"][0]
                 answer_start=a["answer_start"]
                 answer_end=a["answer_start"]+len(a["text"])
@@ -95,6 +92,8 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
                 answer_sent=" ".join(answer_sent)
                 questions.append(question_text)
                 sentences.append(answer_sent)
+
+    print(len(questions),len(sentences))
 
     with open(src_path,"w")as f:
         sentences="\n".join(sentences)
