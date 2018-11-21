@@ -37,6 +37,7 @@ def data_loader(args,path,first=True):
         contexts=t["contexts"]
         questions=t["questions"]
         answers=t["answers"]
+        sentences=t["sentences"]
     with open("data/word2id2vec.json","r")as f:
         t=json.load(f)#numpy(vocab_size*embed_size)
         word2id=t["word2id"]
@@ -45,20 +46,28 @@ def data_loader(args,path,first=True):
 
     #data_size=len(contexts)
     if first:
-        data_size=len(contexts)
+        data_size=len(questions)
     else:
-        data_size=len(contexts)
+        data_size=len(questions)
 
     id2vec=np.array(id2vec)
+
+    print(len(answers))
+
+    contexts_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in contexts[0:data_size]]
+    questions_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in questions[0:data_size]]
+    answers_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in answers[0:data_size]]
+    sentences_id=[[word2id[w] if w in word2id else 1 for w in sent] for sent in sentences[0:data_size]]
+
     id2word={i:w for w,i in word2id.items()}
 
-    contexts_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in contexts[0:data_size]]
-    questions_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in questions[0:data_size]]
-    answers_id=[[word2id[w] if w in word2id else 1  for w in sent] for sent in answers[0:data_size]]
+
+
 
     data={"contexts_id":contexts_id,
         "questions_id":questions_id,
-        "answers_id":answers_id}
+        "answers_id":answers_id,
+        "sentences_id":sentences_id}
 
     if first:
         args.c_vocab_size=len(char2id)
@@ -66,7 +75,7 @@ def data_loader(args,path,first=True):
         args.vocab_size=id2vec.shape[0]
         args.embed_size=id2vec.shape[1]
 
-    return data,id2word
+    return data
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -93,18 +102,29 @@ def loss_calc(predict,target):
     return loss
 
 def predict_calc(predict,target):
-    batch=predict.size(0)
-    seq_len=predict.size(1)
-    predict=predict.contiguous().view(batch*seq_len,-1)
-    target=target.contiguous().view(-1)
-    predict_rate=(torch.argmax(predict,dim=-1)==target).sum().item()
-    return predict_rate
+    #predict:(batch,seq_len,embed_size)
+    #target:(batch,seq_len)
+    type="bleu"
+    if type=="normal":
+        batch=predict.size(0)
+        seq_len=predict.size(1)
+        predict=predict.contiguous().view(batch*seq_len,-1)
+        target=target.contiguous().view(-1)
+        predict_rate=(torch.argmax(predict,dim=-1)==target).sum().item()
+        return predict_rate
+    elif type=="bleu":
+        predict=torch.argmax(predict,dim=-1).tolist()#(batch,seq_len,embed_size)
+        target=target.tolist()#(batch,seq_len)
+        predict_sum=0
+        for p,t in zip(predict,target):#batchごと
+            predict_sum+=nltk.bleu_score.sentence_bleu([p],t)
+        return predict_sum
 
 def model_handler(args,data,train=True):
     start=time.time()
-    contexts_id=data["contexts_id"]
     questions_id=data["questions_id"]
-    answers_id=data["answers_id"]
+    sentences_id=data["sentences_id"]
+    contexts_id=data["contexts_id"]
     data_size=len(answers_id)
     if train:
         batch_size=args.train_batch_size
@@ -118,9 +138,9 @@ def model_handler(args,data,train=True):
     for i_batch,batch in tqdm(enumerate(batches)):
         #batch:(context,question,answer_start,answer_end)*N
         #これからそれぞれを取り出し処理してモデルへ
-        c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
+        c_words=make_vec([sentences_id[i] for i in batch])#(batch,seq_len)
+        #c_words=make_vec([contexts_id[i] for i in batch])#(batch,seq_len)
         q_words=make_vec([questions_id[i] for i in batch])
-        a_words=make_vec([answers_id[i] for i in batch])
         if train:
             optimizer.zero_grad()
         predict=model(a_words,q_words,train=True)#(batch,seq_len,vocab_size)

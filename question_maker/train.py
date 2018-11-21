@@ -61,6 +61,8 @@ def data_loader(args,path,first=True):
 
     id2word={i:w for w,i in word2id.items()}
 
+    
+
 
     data={"contexts_id":contexts_id,
         "questions_id":questions_id,
