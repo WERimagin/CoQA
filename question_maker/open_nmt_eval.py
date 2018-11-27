@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 #tgt_path="tgt_test.txt"
 #pred_path="pred_test.txt"
-tgt_path="data/pred.txt"
+tgt_path="data/pred_train.txt"
 pred_path="data/squad-tgt-val.txt"
 
 target=[]
