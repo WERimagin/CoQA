@@ -24,10 +24,10 @@ def head_find(tgt):
 
 def modify(sentence,question,answer,answer_replace):
     head=head_find(question)
+    """
     if answer in sentence:
         sentence=sentence.replace(answer," ans_rep_tag ")
-    else:
-        return "not found"
+    """
     sentence=" ".join([sentence,"ans_pos_tag",answer,"inter_tag",head])
     return sentence
 
@@ -95,8 +95,6 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
         topic=topic["paragraphs"]
         for paragraph in topic:
             context_text=paragraph["context"].lower()
-            #メモリサイズの確保のため、サイズが大きいcontextはスキップ
-            #結果的に、87599個のcontextのうち、500をカット
             for qas in paragraph["qas"]:
                 question_text=qas["question"].lower()
                 if len(qas["answers"])==0:
@@ -112,8 +110,6 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
                 answer=" ".join(tokenize(answer))
                 """
                 answer_sent=modify(answer_sent,question_text,answer,answer_replace)#answwer_sentにanswerを繋げる。
-                if answer_sent=="not found":#文分割の処理の関係でanswerを見つけられなかったものは除去(10個以下)
-                    continue
                 #tokenizeを掛けて処理
                 answer_sent=" ".join(tokenize(answer_sent))
                 question_text=" ".join(tokenize(question_text))
@@ -124,16 +120,16 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
     print(len(questions),len(sentences))
 
     with open(src_path,"w")as f:
-        sentences="\n".join(sentences)
-        f.write(sentences)
+        for s in sentences:
+            f.write(s+"\n")
 
     with open(tgt_path,"w")as f:
-        questions="\n".join(questions)
-        f.write(questions)
+        for s in questions:
+            f.write(s+"\n")
 
 #main
 version="1.1"
-type="normal"
+type="sentence_answer"
 data_process(input_path="data/squad_train-v{}.json".format(version),src_path="data/squad-src-train-{}.txt".format(type),tgt_path="data/squad-tgt-train-{}.txt".format(type),word_count=True,lower=True)
 data_process(input_path="data/squad_dev-v{}.json".format(version),src_path="data/squad-src-dev-{}.txt".format(type),tgt_path="data/squad-tgt-dev-{}.txt".format(type),word_count=True,lower=True)
 
