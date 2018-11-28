@@ -83,6 +83,7 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
                         char2count[char]+=1
             for qas in paragraph["qas"]:
                 question_text=qas["question"]
+                question_text=" ".join(word_tokenize(question_text))
                 if len(qas["answers"])==0:
                     continue
                 a=qas["answers"][0]
@@ -137,6 +138,6 @@ def vec_process(contexts,word2id,char2id):
 #main
 version="1.1"
 data_process(input_path="data/squad_train-v{}.json".format(version),src_path="data/squad-src-train.txt",tgt_path="data/squad-tgt-train.txt",word_count=True,lower=True)
-data_process(input_path="data/squad_dev-v{}.json".format(version),src_path="data/squad-src-val.txt",tgt_path="data/squad-tgt-val.txt",word_count=True,lower=True)
+data_process(input_path="data/squad_dev-v{}.json".format(version),src_path="data/squad-src-dev.txt",tgt_path="data/squad-tgt-dev.txt",word_count=True,lower=True)
 
 #python preprocess.py -train_src data/squad-src-train.txt -train_tgt data/squad-tgt-train.txt -valid_src data/squad-src-val.txt -valid_tgt data/squad-tgt-val.txt -save_data data/demo
