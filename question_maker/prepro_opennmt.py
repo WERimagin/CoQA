@@ -24,10 +24,6 @@ def head_find(tgt):
 
 def modify(sentence,question,answer):
     head=head_find(question)
-    if answer in sentence:
-        sentence=sentence.replace(answer," <answer_word> ")#上手くtokenizeされないことがあるのでスペースを入れる。
-    else:
-        return "not found"
     sentence=" ".join([sentence,"<answer>",answer,"<inter>",head])
     return sentence
 
@@ -111,13 +107,14 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
                 question_text=" ".join(tokenize(question_text))
                 answer=" ".join(tokenize(answer))
                 """
-
+                answer_sent=" ".join(tokenize(answer_sent))
+                question_text=" ".join(tokenize(question_text))
+                answer=" ".join(tokenize(answer))
                 answer_sent=modify(answer_sent,question_text,answer)#answwer_sentにanswerを繋げる。
                 if answer_sent=="not found":#文分割の処理の関係でanswerを見つけられなかったものは除去(10個以下)
                     continue
                 #tokenizeを掛けて処理
-                answer_sent=" ".join(tokenize(answer_sent))
-                question_text=" ".join(tokenize(question_text))
+
                 questions.append(question_text)
                 sentences.append(answer_sent)
 
