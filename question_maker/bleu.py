@@ -56,9 +56,9 @@ src_path="../data/open_nmt/squad-src-train.txt"
 tgt_path="../data/open_nmt/squad-tgt-train.txt"
 pred_path="../data/open_nmt/pred_train.txt"
 """
-src_path="../data/squad-src-dev.txt"
-tgt_path="../data/squad-tgt-dev.txt"
-pred_path="../data/pred_test.txt"
+src_path="data/squad-src-dev-normal.txt"
+tgt_path="data/squad-tgt-dev-normal.txt"
+pred_path="data/pred_test.txt"
 
 
 src=[]

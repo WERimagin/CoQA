@@ -22,10 +22,10 @@ def head_find(tgt):
             break
     return true_head
 
-def modify(sentence,question,answer):
+def modify(sentence,question,answer,answer_replace):
     head=head_find(question)
     if answer in sentence:
-        sentence=sentence.replace(answer,"ans_rep_tag")
+        sentence=sentence.replace(answer," ans_rep_tag ")
     else:
         return "not found"
     sentence=" ".join([sentence,"ans_pos_tag",answer,"inter_tag",head])
@@ -88,7 +88,7 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
     answers=[]
     sentences=[]
     ids=[]
-    answer_replace=True
+    answer_replace=False
     word2count=collections.Counter()
     char2count=collections.Counter()
     for topic in tqdm(data["data"]):
@@ -111,7 +111,7 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
                 question_text=" ".join(tokenize(question_text))
                 answer=" ".join(tokenize(answer))
                 """
-                answer_sent=modify(answer_sent,question_text,answer)#answwer_sentにanswerを繋げる。
+                answer_sent=modify(answer_sent,question_text,answer,answer_replace)#answwer_sentにanswerを繋げる。
                 if answer_sent=="not found":#文分割の処理の関係でanswerを見つけられなかったものは除去(10個以下)
                     continue
                 #tokenizeを掛けて処理
@@ -133,8 +133,8 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
 
 #main
 version="1.1"
-type="-sentence_answer"
-data_process(input_path="data/squad_train-v{}.json".format(version),src_path="data/squad-src-train{}.txt".format(type),tgt_path="data/squad-tgt-train{}.txt".format(type),word_count=True,lower=True)
-data_process(input_path="data/squad_dev-v{}.json".format(version),src_path="data/squad-src-dev{}.txt".format(type),tgt_path="data/squad-tgt-dev{}.txt".format(type),word_count=True,lower=True)
+type="normal"
+data_process(input_path="data/squad_train-v{}.json".format(version),src_path="data/squad-src-train-{}.txt".format(type),tgt_path="data/squad-tgt-train-{}.txt".format(type),word_count=True,lower=True)
+data_process(input_path="data/squad_dev-v{}.json".format(version),src_path="data/squad-src-dev-{}.txt".format(type),tgt_path="data/squad-tgt-dev-{}.txt".format(type),word_count=True,lower=True)
 
 #python preprocess.py -train_src data/squad-src-train.txt -train_tgt data/squad-tgt-train.txt -valid_src data/squad-src-val.txt -valid_tgt data/squad-tgt-val.txt -save_data data/demo
