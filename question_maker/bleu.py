@@ -2,11 +2,12 @@ import warnings
 warnings.filterwarnings("ignore")
 import nltk
 from nltk.tokenize import word_tokenize,sent_tokenize
-from nltk.translate.bleu_score import sentence_bleu
+from nltk.translate.bleu_score import sentence_bleu,corpus_bleu
 from tqdm import tqdm
 from collections import defaultdict
 import collections
 import math
+from statistics import mean, median,variance,stdev
 
 def compute_score(t,p):
     t_dict=collections.Counter(t)
@@ -51,14 +52,17 @@ if modify==True:
     src_path="../data/processed/src-dev-modify.txt"
     tgt_path="../data/processed/tgt-dev.txt"
     pred_path="../data/pred_modify.txt"
+"""
+type="sentence_answer"
+src_path="data/squad-src-dev-{}.txt".format(type)
+tgt_path="data/squad-tgt-dev-{}.txt".format(type)
+pred_path="data/pred_{}.txt".format(type)
 
-src_path="../data/open_nmt/squad-src-train.txt"
-tgt_path="../data/open_nmt/squad-tgt-train.txt"
-pred_path="../data/open_nmt/pred_train.txt"
 """
 src_path="data/squad-src-dev-normal.txt"
 tgt_path="data/squad-tgt-dev-normal.txt"
-pred_path="data/pred_test.txt"
+pred_path="data/pred_normal.txt"
+"""
 
 
 src=[]
@@ -76,19 +80,56 @@ with open(tgt_path)as f:
 with open(pred_path)as f:
     for line in f:
         predict.append(line[:-1])
-"""
-for i in range(len(target)):
-    if i%500==0:
+
+
+count=0
+if True:
+    for i in range(len(src)):
         s=src[i]
         t=target[i]
         p=predict[i]
-        print(s)
-        print(t)
-        print(p)
-        print()
-"""
-target=[word_tokenize(s) for s in target]
-predict=[word_tokenize(s) for s in predict]
+        a=s.split()[-1]
+
+        if len(s.split())<=50:
+            print(s)
+            print(t)
+            print(p)
+            print(a)
+            print()
+
+target=[s.split() for s in target]
+predict=[s.split() for s in predict]
+
+#一文ずつ評価,corpusのサイズ考慮
+if True:
+
+    nltk_target=list(map(lambda x:[x],target))
+    nltk_predict=predict
+    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(1,0,0,0)))
+    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.5,0.5,0,0)))
+    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.333,0.333,0.333,0)))
+    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.25,0.25,0.25,0.25)))
+    """
+    count_target=sum(map(len,target))
+    count_predict=sum(map(len,predict))
+    penalty=math.exp(1-count_target/count_predict) if count_target>count_predict else 1
+    print(penalty)
+    bleu_score=[]
+
+    for n in range(1,5):
+        score_sum=0
+        count_target=0
+        count_predict=0
+        for i in range(len(predict)):
+            t=n_gram(target[i],n)
+            p=n_gram(predict[i],n)
+            score_sum+=compute_score(t,p)
+            count_target+=len(t)
+            count_predict+=len(p)
+        bleu_score.append(score_sum/count_predict)
+        score=penalty*math.exp(mean(map(math.log,bleu_score[0:n])))
+        print("{}gram score is {}".format(n,score))
+    """
 """
 count=0
 for t,p in zip(target,predict):
@@ -106,39 +147,20 @@ print(target_dict.most_common())
 for s in predict:
     predict_dict[head_find(s)]+=1
 print(predict_dict.most_common())
+
+count=0
+for t,p in zip(target,predict):
+    count+=head_compare(t,p)
+print(count/len(target))
 """
 
-
-#一文ずつ評価,corpusのサイズ考慮
-if True:
-    for n in range(1,2):
-        score_sum=0
-        count_target=0
-        count_predict=0
-        for i in tqdm(range(len(predict))):
-            t=target[i]
-            p=predict[i]
-            if i<=100:
-                print(" ".join(t))
-                print(" ".join(p))
-                print()
-            #t=ngram(word_tokenize(t),n)
-            #p=ngram(word_tokenize(p),n)
-            score_sum+=compute_score(t,p)
-            count_target+=len(t)
-            count_predict+=len(p)
-        penalty=math.exp(1-count_target/count_predict) if count_target>count_predict else 1
-        score=penalty*score_sum/count_predict
-        print(count_target,count_predict)
-        print(score)
-
-
+"""
 ########################
 
 #同じ文はまとめてtargetとして扱う。
 #この手法は同じpredictについてもそれぞれ計算。元のはまとめて計算
 #shortのoptionについてはほとんど一致
-if True:
+if False:
     print(len(src),len(target),len(predict))
     src=src[0:len(predict)]
     target=target[0:len(predict)]
@@ -152,37 +174,45 @@ if True:
         target_dict[s].append(t)
         predict_dict[s]=p
 
-    print("size:{}\n".format(len(target)))
+    print("size:{}\n".format(len(target_dict)))
 
+    #calucurate penalty
+    bleu_score=[]
+    count_target=0
+    count_predict=0
+    for i,s in enumerate(src_set):
+        t=target_dict[s]
+        p=predict_dict[s]
+        c_t=min(map(len,t))
+        c_p=len(p)
+        count_target+=c_t
+        count_predict+=c_p
+
+    penalty=math.exp(1-count_target/count_predict) if count_target>count_predict else 1
+    print(penalty)
+    print(count_target,count_predict)
+
+    #n-gramごとにbleuを計算して平均を取る。
+    #本家のbleuの計算はよくわからないので要検証
     for n in range(1,5):
         score_sum=0
-        count_target=0
-        count_predict=0
-        t_list=[]
-        p_list=[]
-        for i,s in tqdm(enumerate(src_set)):
+        correct_count=0
+        total_count=0
+        for i,s in enumerate(src_set):
             t=[n_gram(sent,n) for sent in target_dict[s]]
             p=n_gram(predict_dict[s],n)
-            score=compute_score_refs(t,p)
-            score_sum+=score
-            c_t=min(map(len,t))
-            c_p=len(p)
-            p_list.append(c_t)
-            count_target+=c_t
-            count_predict+=c_p
-
-        print(count_target,count_predict)
-        print(sum(sorted(p_list)[:-100:-1]))
-        print(len(p_list))
-        penalty=math.exp(1-count_target/count_predict) if count_target>count_predict else 1
-        score=penalty*score_sum/count_predict
+            correct_num=compute_score_refs(t,p)
+            correct_count+=correct_num
+            total_count+=len(p)
+        print(correct_count,total_count)
+        score=correct_count/total_count
+        bleu_score.append(score)
+        score=penalty*math.exp(mean(map(math.log,bleu_score[0:n])))
         print("{}gram score is {}".format(n,score))
-
-
         print()
 """
 ######################################
-
+"""
 #一文ずつ評価(sentence_bleu使用)
 if False:
     score_sum_bleu1=0

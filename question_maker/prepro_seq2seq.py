@@ -1,4 +1,7 @@
 #SQuADのデータ処理
+#必要条件:CoreNLP
+#Tools/core...で
+#java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000
 
 import os
 import sys
@@ -12,6 +15,8 @@ from nltk.tokenize import word_tokenize,sent_tokenize
 import pickle
 import collections
 
+from func.corenlp import CoreNLP
+
 def head_find(tgt):
     q_head=["what","how","who","when","which","where","why","whose","whom","is","are","was","were","do","did","does"]
     tgt_tokens=word_tokenize(tgt)
@@ -22,13 +27,13 @@ def head_find(tgt):
             break
     return true_head
 
-def modify(sentence,question,answer,answer_replace):
-    head=head_find(question)
+def modify(sentence,question_interro,answer,answer_replace):
+    #head=head_find(question)
     """
     if answer in sentence:
         sentence=sentence.replace(answer," ans_rep_tag ")
     """
-    sentence=" ".join([sentence,"ans_pos_tag",answer,"inter_tag",head])
+    sentence=" ".join([sentence,"ans_pos_tag",answer,"interro_tag",question_interro])
     return sentence
 
 
@@ -77,7 +82,8 @@ def answer_find(context_text,answer_start,answer_end,answer_replace):
     return answer_sent
 
 
-def data_process(input_path,src_path,tgt_path,word_count,lower=True):
+
+def data_process(input_path,src_path,tgt_path,question_modify,train=True):
     with open(input_path,"r") as f:
         data=json.load(f)
     contexts=[]
@@ -89,8 +95,7 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
     sentences=[]
     ids=[]
     answer_replace=False
-    word2count=collections.Counter()
-    char2count=collections.Counter()
+    corenlp=CoreNLP()
     for topic in tqdm(data["data"]):
         topic=topic["paragraphs"]
         for paragraph in topic:
@@ -100,22 +105,28 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
                 if len(qas["answers"])==0:
                     continue
                 a=qas["answers"][0]
-                answer=a["text"].lower()
+                answer_text=a["text"].lower()
                 answer_start=a["answer_start"]
                 answer_end=a["answer_start"]+len(a["text"])
-                answer_sent=answer_find(context_text,answer_start,answer_end,answer_replace)#contextの中からanswerが含まれる文を見つけ出す
-                """
-                answer_sent=" ".join(tokenize(answer_sent))
-                question_text=" ".join(tokenize(question_text))
-                answer=" ".join(tokenize(answer))
-                """
-                answer_sent=modify(answer_sent,question_text,answer,answer_replace)#answwer_sentにanswerを繋げる。
-                #tokenizeを掛けて処理
-                answer_sent=" ".join(tokenize(answer_sent))
-                question_text=" ".join(tokenize(question_text))
-                answer=" ".join(tokenize(answer))
-                questions.append(question_text)
-                sentences.append(answer_sent)
+                sentence=answer_find(context_text,answer_start,answer_end,answer_replace)#contextの中からanswerが含まれる文を見つけ出す
+                if len(question_text)<=5:#ゴミデータ(10個程度)は削除
+                    continue
+                if question_modify==True:
+                    question_interro=corenlp.forward(question_text)#疑問詞を探してくる
+                    if question_interro!="none_tag":
+                        sentence_interro=modify(sentence,question_interro,answer_text,answer_replace)
+                        sentence_interro=" ".join(tokenize(sentence_interro))
+                        answer_text=" ".join(tokenize(answer_text))
+                        question_text=" ".join(tokenize(question_text))
+                        questions.append(question_text)
+                        sentences.append(sentence_interro)
+                    sentence=modify(sentence,question_text,answer_text,answer_replace)
+                    sentence=" ".join(tokenize(sentence))
+                    answer_text=" ".join(tokenize(answer_text))
+                    question_text=" ".join(tokenize(question_text))
+                    questions.append(question_text)
+                    sentences.append(sentence)
+
 
     print(len(questions),len(sentences))
 
@@ -129,8 +140,22 @@ def data_process(input_path,src_path,tgt_path,word_count,lower=True):
 
 #main
 version="1.1"
-type="sentence_answer"
-data_process(input_path="data/squad_train-v{}.json".format(version),src_path="data/squad-src-train-{}.txt".format(type),tgt_path="data/squad-tgt-train-{}.txt".format(type),word_count=True,lower=True)
-data_process(input_path="data/squad_dev-v{}.json".format(version),src_path="data/squad-src-dev-{}.txt".format(type),tgt_path="data/squad-tgt-dev-{}.txt".format(type),word_count=True,lower=True)
+type="interro_answer"
+question_modify=True
+question_interro=True
 
-#python preprocess.py -train_src data/squad-src-train.txt -train_tgt data/squad-tgt-train.txt -valid_src data/squad-src-val.txt -valid_tgt data/squad-tgt-val.txt -save_data data/demo
+
+data_process(input_path="data/squad_train-v{}.json".format(version),
+            src_path="data/squad-src-train-{}.txt".format(type),
+            tgt_path="data/squad-tgt-train-{}.txt".format(type),
+            question_modify=True,
+            train=True
+            )
+"""
+data_process(input_path="data/squad_dev-v{}.json".format(version),
+            src_path="data/squad-src-dev-{}.txt".format(type),
+            tgt_path="data/squad-tgt-dev-{}.txt".format(type),
+            question_modify=True,
+            train=False
+            )
+"""
