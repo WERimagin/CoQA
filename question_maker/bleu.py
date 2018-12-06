@@ -53,7 +53,7 @@ if modify==True:
     tgt_path="../data/processed/tgt-dev.txt"
     pred_path="../data/pred_modify.txt"
 """
-type="sentence_answer"
+type="interro_answer_sub"
 src_path="data/squad-src-dev-{}.txt".format(type)
 tgt_path="data/squad-tgt-dev-{}.txt".format(type)
 pred_path="data/pred_{}.txt".format(type)
@@ -81,34 +81,57 @@ with open(pred_path)as f:
     for line in f:
         predict.append(line[:-1])
 
-
-count=0
+count=collections.Counter()
+count_100=0
 if True:
-    for i in range(len(src)):
+    for i in range(1000,1100):
         s=src[i]
         t=target[i]
         p=predict[i]
-        a=s.split()[-1]
-
-        if len(s.split())<=50:
+        if len(s.split())==40:
             print(s)
             print(t)
             print(p)
-            print(a)
             print()
+"""
+
+print(count)
+print(count_100)
+
+src=[s[:s.index("interro_tag")] for s in src]
+c=collections.Counter()
+for s in src:
+    c[len(s.split())]+=1
+
+print(*sorted(list(c.items())),sep="\n")
+
 
 target=[s.split() for s in target]
 predict=[s.split() for s in predict]
 
+"""
+target2=target
+predict2=predict
+
+target=[]
+predict=[]
+
+for i in range(len(src)):
+    l=len(src[i].split())
+    if 120<=l and l<=140:
+        target.append(target2[i].split())
+        predict.append(predict2[i].split())
+
+print(len(target),len(predict))
+
 #一文ずつ評価,corpusのサイズ考慮
 if True:
-
     nltk_target=list(map(lambda x:[x],target))
     nltk_predict=predict
     print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(1,0,0,0)))
     print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.5,0.5,0,0)))
     print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.333,0.333,0.333,0)))
-    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.25,0.25,0.25,0.25)))
+    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict))
     """
     count_target=sum(map(len,target))
     count_predict=sum(map(len,predict))

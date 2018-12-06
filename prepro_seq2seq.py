@@ -15,8 +15,6 @@ from nltk.tokenize import word_tokenize,sent_tokenize
 import pickle
 import collections
 
-from func.corenlp import CoreNLP
-
 def head_find(tgt):
     q_head=["what","how","who","when","which","where","why","whose","whom","is","are","was","were","do","did","does"]
     tgt_tokens=word_tokenize(tgt)
@@ -64,14 +62,17 @@ def tokenize(sent):
 #やってることはc2iと多分同じアルゴリズム
 def answer_find(context_text,answer_start,answer_end,answer_replace):
     context=sent_tokenize(context_text)
-    current_p=0
+    sent_start_id=-1
+    sent_end_id=-1
     for i,sent in enumerate(context):
+        current_p=context_text.find(sent)
         end_p=current_p+len(sent)
-        if current_p<=answer_start and answer_start<=end_p:
+        if current_p<=answer_start and sent_start_id==-1:
             sent_start_id=i
-        if current_p<=answer_end and answer_end<=end_p:
+        if current_p<=answer_end and sent_end_id==-1:
             sent_end_id=i
-        current_p+=len(sent)+1#スペースが消えている分の追加、end_pの計算のところでするべきかは不明
+    if sent_start_id==-1 or sent_end_id==-1:
+        sys.exit(-1)
     answer_sent=" ".join(context[sent_start_id:sent_end_id+1])
     #ここで答えを置換する方法。ピリオドが消滅した場合などに危険なので止める。
     """
@@ -95,38 +96,28 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=Fal
     sentences=[]
     ids=[]
     answer_replace=False
-    corenlp=CoreNLP()
-    for topic in tqdm(data["data"]):
-        topic=topic["paragraphs"]
-        for paragraph in topic:
-            context_text=paragraph["context"].lower()
-            for qas in paragraph["qas"]:
-                question_text=qas["question"].lower()
-                if len(qas["answers"])==0:
-                    continue
-                a=qas["answers"][0]
-                answer_text=a["text"].lower()
-                answer_start=a["answer_start"]
-                answer_end=a["answer_start"]+len(a["text"])
-                sentence=answer_find(context_text,answer_start,answer_end,answer_replace)#contextの中からanswerが含まれる文を見つけ出す
-                if len(question_text)<=5:#ゴミデータ(10個程度)は削除
-                    continue
-                if question_modify==True:
-                    question_interro=corenlp.forward(question_text)#疑問詞を探してくる
-                    if question_interro!="none_tag":
-                        sentence_interro=modify(sentence,question_interro,answer_text,answer_replace)
-                        sentence_interro=" ".join(tokenize(sentence_interro))
-                        answer_text=" ".join(tokenize(answer_text))
-                        question_text=" ".join(tokenize(question_text))
-                        questions.append(question_text)
-                        sentences.append(sentence_interro)
-                    if sub==False:#省略していないものを含める
-                        sentence=modify(sentence,question_text,answer_text,answer_replace)
-                        sentence=" ".join(tokenize(sentence))
-                        answer_text=" ".join(tokenize(answer_text))
-                        question_text=" ".join(tokenize(question_text))
-                        questions.append(question_text)
-                        sentences.append(sentence)
+    for paragraph in tqdm(data["data"]):
+        context_text=paragraph["story"].lower()
+        for i in range(len(paragraph["questions"])):
+            question_dict=paragraph["questions"][i]
+            answer_dict=paragraph["answers"][i]
+            question_text=question_dict["input_text"]
+            answer_text=answer_dict["input_text"]
+
+            span_start=answer_dict["span_start"]
+            span_end=answer_dict["span_end"]
+            span_text=answer_dict["span_text"]
+            turn_id=paragraph["questions"][i]["turn_id"]
+            if span_start==-1:
+                continue
+            sentence=answer_find(context_text,span_start,span_end,answer_replace)
+            sentence=modify(sentence,question_text,answer_text,answer_replace)
+            sentence=" ".join(tokenize(sentence))
+            question_text=" ".join(tokenize(question_text))
+
+            sentences.append(sentence)
+            questions.append(question_text)
+
 
 
     print(len(questions),len(sentences))
@@ -141,21 +132,21 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=Fal
 
 #main
 version="1.1"
-type="interro_answer_sub"
+type="normal"
 question_modify=True
 question_interro=True
 
-"""
-data_process(input_path="data/squad_train-v{}.json".format(version),
-            src_path="data/squad-src-train-{}.txt".format(type),
-            tgt_path="data/squad-tgt-train-{}.txt".format(type),
+data_process(input_path="data/coqa-train.json",
+            src_path="data/coqa-src-train-{}.txt".format(type),
+            tgt_path="data/coqa-tgt-train-{}.txt".format(type),
             question_modify=True,
-            train=True
+            train=True,
+            sub=True
             )
-"""
-data_process(input_path="data/squad_dev-v{}.json".format(version),
-            src_path="data/squad-src-dev-{}.txt".format(type),
-            tgt_path="data/squad-tgt-dev-{}.txt".format(type),
+
+data_process(input_path="data/coqa-dev.json",
+            src_path="data/coqa-src-dev-{}.txt".format(type),
+            tgt_path="data/coqa-tgt-dev-{}.txt".format(type),
             question_modify=True,
             train=False,
             sub=True
