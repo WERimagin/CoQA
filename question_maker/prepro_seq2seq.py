@@ -27,13 +27,14 @@ def head_find(tgt):
             break
     return true_head
 
-def modify(sentence,question_interro,answer,answer_replace):
+def modify(sentence,question_interro):
     #head=head_find(question)
     """
     if answer in sentence:
         sentence=sentence.replace(answer," ans_rep_tag ")
     """
-    sentence=" ".join([sentence,"ans_pos_tag",answer,"interro_tag",question_interro])
+    #sentence=" ".join([sentence,"ans_pos_tag",answer,"interro_tag",question_interro])
+    sentence=" ".join([sentence,"interro_tag",question_interro])
     return sentence
 
 
@@ -83,7 +84,7 @@ def answer_find(context_text,answer_start,answer_end,answer_replace):
 
 
 
-def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=False):
+def data_process(input_path,src_path,tgt_path,question_modify,train=True,complete=True,paragraph=True):
     with open(input_path,"r") as f:
         data=json.load(f)
     contexts=[]
@@ -113,15 +114,16 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=Fal
                     continue
                 if question_modify==True:
                     question_interro=corenlp.forward(question_text)#疑問詞を探してくる
-                    if question_interro!="none_tag":
-                        sentence_interro=modify(sentence,question_interro,answer_text,answer_replace)
-                        sentence_interro=" ".join(tokenize(sentence_interro))
-                        answer_text=" ".join(tokenize(answer_text))
-                        question_text=" ".join(tokenize(question_text))
-                        questions.append(question_text)
-                        sentences.append(sentence_interro)
-                    if sub==False:#省略していないものを含める
-                        sentence=modify(sentence,question_text,answer_text,answer_replace)
+                    if question_interro=="none_tag":
+                        continue
+                    sentence_interro=modify(context_text,question_interro)
+                    sentence_interro=" ".join(tokenize(sentence_interro))
+                    answer_text=" ".join(tokenize(answer_text))
+                    question_text=" ".join(tokenize(question_text))
+                    questions.append(question_text)
+                    sentences.append(sentence_interro)
+                    if complete==True:#省略していないものを含める
+                        sentence=modify(context_text,question_text)
                         sentence=" ".join(tokenize(sentence))
                         answer_text=" ".join(tokenize(answer_text))
                         question_text=" ".join(tokenize(question_text))
@@ -141,22 +143,24 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=Fal
 
 #main
 version="1.1"
-type="interro_answer_sub"
+type="paragraph_interro"
 question_modify=True
 question_interro=True
 
-"""
-data_process(input_path="data/squad_train-v{}.json".format(version),
+
+data_process(input_path="data/squad-train-v{}.json".format(version),
             src_path="data/squad-src-train-{}.txt".format(type),
             tgt_path="data/squad-tgt-train-{}.txt".format(type),
             question_modify=True,
             train=True
             )
 """
-data_process(input_path="data/squad_dev-v{}.json".format(version),
+data_process(input_path="data/squad-dev-v{}.json".format(version),
             src_path="data/squad-src-dev-{}.txt".format(type),
             tgt_path="data/squad-tgt-dev-{}.txt".format(type),
             question_modify=True,
             train=False,
-            sub=True
+            complete=True,
+            paragraph=True,
             )
+"""

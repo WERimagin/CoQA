@@ -53,7 +53,7 @@ if modify==True:
     tgt_path="../data/processed/tgt-dev.txt"
     pred_path="../data/pred_modify.txt"
 """
-type="interro_answer_sub"
+type="interro_sub"
 src_path="data/squad-src-dev-{}.txt".format(type)
 tgt_path="data/squad-tgt-dev-{}.txt".format(type)
 pred_path="data/pred_{}.txt".format(type)
@@ -83,16 +83,12 @@ with open(pred_path)as f:
 
 count=collections.Counter()
 count_100=0
-if True:
+if False:
     for i in range(1000,1100):
         s=src[i]
         t=target[i]
         p=predict[i]
-        if len(s.split())==40:
-            print(s)
-            print(t)
-            print(p)
-            print()
+
 """
 
 print(count)
@@ -110,6 +106,7 @@ target=[s.split() for s in target]
 predict=[s.split() for s in predict]
 
 """
+"""
 target2=target
 predict2=predict
 
@@ -123,6 +120,28 @@ for i in range(len(src)):
         predict.append(predict2[i].split())
 
 print(len(target),len(predict))
+"""
+for i in range(len(src)):
+    s=src[i]
+    t=[target[i]]
+    p=predict[i]
+    if len(s.split())>=55:
+        print(s)
+        print(t)
+        print(p)
+        print()
+
+target=[t.split() for t in target]
+predict=[p.split() for p in predict]
+
+src=[s.split() for s in src]
+interro_list=[s[s.index("interro_tag")+1:] for s in src]
+
+print(*interro_list[0:100],sep="\n")
+
+
+
+
 
 #一文ずつ評価,corpusのサイズ考慮
 if True:
@@ -132,6 +151,9 @@ if True:
     print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.5,0.5,0,0)))
     print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.333,0.333,0.333,0)))
     print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict))
+
+    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,interro_list,weights=(1,0,0,0)))
+    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,interro_list))
     """
     count_target=sum(map(len,target))
     count_predict=sum(map(len,predict))

@@ -132,7 +132,7 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=Fal
 
 #main
 version="1.1"
-type="normal"
+type=""
 question_modify=True
 question_interro=True
 
