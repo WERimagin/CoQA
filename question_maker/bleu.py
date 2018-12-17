@@ -53,16 +53,22 @@ if modify==True:
     tgt_path="../data/processed/tgt-dev.txt"
     pred_path="../data/pred_modify.txt"
 """
-type="interro_sub"
-src_path="data/squad-src-dev-{}.txt".format(type)
-tgt_path="data/squad-tgt-dev-{}.txt".format(type)
-pred_path="data/pred_{}.txt".format(type)
 
-"""
-src_path="data/squad-src-dev-normal.txt"
-tgt_path="data/squad-tgt-dev-normal.txt"
-pred_path="data/pred_normal.txt"
-"""
+coqa=True
+
+if coqa==False:
+    type="interro_history"
+    src_path="data/squad-src-dev-{}.txt".format(type)
+    tgt_path="data/squad-tgt-dev-{}.txt".format(type)
+    pred_path="data/pred_{}.txt".format(type)
+
+
+if coqa==True:
+    type="interro_history"
+    src_path="data/coqa-src-dev-{}.txt".format(type)
+    tgt_path="data/coqa-tgt-dev-{}.txt".format(type)
+    pred_path="data/pred_coqa_{}.txt".format(type)
+
 
 
 src=[]
@@ -81,63 +87,22 @@ with open(pred_path)as f:
     for line in f:
         predict.append(line[:-1])
 
-count=collections.Counter()
-count_100=0
-if False:
-    for i in range(1000,1100):
-        s=src[i]
-        t=target[i]
-        p=predict[i]
 
-"""
-
-print(count)
-print(count_100)
-
-src=[s[:s.index("interro_tag")] for s in src]
-c=collections.Counter()
-for s in src:
-    c[len(s.split())]+=1
-
-print(*sorted(list(c.items())),sep="\n")
-
-
-target=[s.split() for s in target]
-predict=[s.split() for s in predict]
-
-"""
-"""
-target2=target
-predict2=predict
-
-target=[]
-predict=[]
-
-for i in range(len(src)):
-    l=len(src[i].split())
-    if 120<=l and l<=140:
-        target.append(target2[i].split())
-        predict.append(predict2[i].split())
-
-print(len(target),len(predict))
-"""
-for i in range(len(src)):
+for i in range(200,1300):
     s=src[i]
-    t=[target[i]]
+    t=target[i]
     p=predict[i]
-    if len(s.split())>=55:
+    if len(t.split())<4:
         print(s)
         print(t)
         print(p)
         print()
 
+
+
 target=[t.split() for t in target]
 predict=[p.split() for p in predict]
 
-src=[s.split() for s in src]
-interro_list=[s[s.index("interro_tag")+1:] for s in src]
-
-print(*interro_list[0:100],sep="\n")
 
 
 

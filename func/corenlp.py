@@ -37,8 +37,8 @@ class CoreNLP():
 
         #疑問詞がなかった時のエラー処理
         if interro_id==-1:
-            print(self.count)
-            return "none_tag"
+            #print(self.count)
+            return "none_tag","none_tag"
 
 
         G = nx.DiGraph()
@@ -54,6 +54,7 @@ class CoreNLP():
             node_list=[s_path[0]]
         else:#疑問詞周り
             node_list=[node for node in G.nodes() if nx.has_path(G,node,s_path[-3])]
+        neg_node_list=[node for node in G.nodes() if node not in node_list and node!=0]
         question=" ".join([token_list[node]["text"] for node in node_list])
-
-        return question
+        neg_question=" ".join([token_list[node]["text"] for node in neg_node_list])
+        return question,neg_question

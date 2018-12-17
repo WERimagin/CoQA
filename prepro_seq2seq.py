@@ -25,14 +25,34 @@ def head_find(tgt):
             break
     return true_head
 
-def modify(sentence,question_interro,answer,answer_replace):
+def modify(sentence,question_interro):
     #head=head_find(question)
     """
     if answer in sentence:
         sentence=sentence.replace(answer," ans_rep_tag ")
     """
-    sentence=" ".join([sentence,"ans_pos_tag",answer,"interro_tag",question_interro])
+    #sentence=" ".join([sentence,"ans_pos_tag",answer,"interro_tag",question_interro])
+    sentence=" ".join([sentence,"interro_tag",question_interro])
     return sentence
+
+def modify_history(history,now):
+    #head=head_find(question)
+    """
+    if answer in sentence:
+        sentence=sentence.replace(answer," ans_rep_tag ")
+    """
+    #sentence=" ".join([sentence,"ans_pos_tag",answer,"interro_tag",question_interro])
+    sentence=" ".join([history,"history_append_tag",now])
+    return sentence
+
+def history_maker(neg_interro,question_interro):
+    interro_list=["what","where","who","why","which","whom","how",""]
+    while True:
+        index=random.randrange(len(interro_list))
+        if interro_list[index]!=question_interro.split()[0]:
+            break
+    question=interro_list[index]+" "+neg_interro
+    return question
 
 
 def c2wpointer(context_text,context,answer_start,answer_end):#answer_start,endをchara単位からword単位へ変換
@@ -84,7 +104,7 @@ def answer_find(context_text,answer_start,answer_end,answer_replace):
 
 
 
-def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=False):
+def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=False,paragraph=True,history=True,classify_flag=0):
     with open(input_path,"r") as f:
         data=json.load(f)
     contexts=[]
@@ -97,7 +117,11 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=Fal
     ids=[]
     answer_replace=False
     for paragraph in tqdm(data["data"]):
+        classify_flag=1-classify_flag
+        if classify_flag==0:
+            continue
         context_text=paragraph["story"].lower()
+        question_history=[]
         for i in range(len(paragraph["questions"])):
             question_dict=paragraph["questions"][i]
             answer_dict=paragraph["answers"][i]
@@ -108,17 +132,37 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=Fal
             span_end=answer_dict["span_end"]
             span_text=answer_dict["span_text"]
             turn_id=paragraph["questions"][i]["turn_id"]
-            if span_start==-1:
-                continue
-            sentence=answer_find(context_text,span_start,span_end,answer_replace)
-            sentence=modify(sentence,question_text,answer_text,answer_replace)
-            sentence=" ".join(tokenize(sentence))
-            question_text=" ".join(tokenize(question_text))
+            if history==False:
+                if paragraph==False:
+                    if span_start==-1:
+                        continue
+                    sentence=answer_find(context_text,span_start,span_end,answer_replace)
+                    sentence=modify(sentence,question_text,answer_text,answer_replace)
+                    sentence=" ".join(tokenize(sentence))
+                    question_text=" ".join(tokenize(question_text))
 
-            sentences.append(sentence)
-            questions.append(question_text)
-
-
+                    sentences.append(sentence)
+                    questions.append(question_text)
+                else:
+                    sentence=modify(context_text,question_text)
+                    sentence=" ".join(tokenize(sentence))
+                    question_text=" ".join(tokenize(question_text))
+                    sentences.append(sentence)
+                    questions.append(question_text)
+            else:
+                if len(question_history)>0:
+                    q_his=question_history[-1]
+                    sentence=modify_history(q_his,question_text)
+                    sentence=" ".join(tokenize(sentence))
+                    question_text=" ".join(tokenize(question_text))
+                    sentences.append(sentence)
+                    questions.append(question_text)
+                else:
+                    sentence=" ".join(tokenize(question_text))
+                    question_text=" ".join(tokenize(question_text))
+                    sentences.append(sentence)
+                    questions.append(question_text)
+                question_history.append(question_text)
 
     print(len(questions),len(sentences))
 
@@ -132,22 +176,27 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,sub=Fal
 
 #main
 version="1.1"
-type=""
+type="split2-interro"
 question_modify=True
 question_interro=True
 
-data_process(input_path="data/coqa-train.json",
+
+data_process(input_path="data/coqa-train-v1.0-split2.json",
             src_path="data/coqa-src-train-{}.txt".format(type),
             tgt_path="data/coqa-tgt-train-{}.txt".format(type),
             question_modify=True,
             train=True,
-            sub=True
+            sub=False,
+            paragraph=False
             )
-
+"""
 data_process(input_path="data/coqa-dev.json",
             src_path="data/coqa-src-dev-{}.txt".format(type),
             tgt_path="data/coqa-tgt-dev-{}.txt".format(type),
             question_modify=True,
             train=False,
-            sub=True
+            sub=True,
+            paragraph=False,
+            history=True
             )
+"""
