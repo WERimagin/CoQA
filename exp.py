@@ -138,7 +138,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
         for i,line in tqdm(enumerate(f)):
             line_split=line.split()
             w2vec[" ".join(line_split[0:-300]).lower()]=[float(i) for i in line_split[-300:]]
-            if i==200000:
+            if i==1000:
                 break
 
     print("end")
@@ -184,7 +184,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                                 for s in sent_tokenize(context_text)]
 
                     sent_vec=np.sum([w2vec[word] for word in word_tokenize(join_text) if word in w2vec])
-
+                    print(sent_vec)
                     cos={i:cos_sim(v,sent_vec) for i,v in enumerate(para_vec)}
                     cos=sorted(cos.items(),key=lambda x:-x[1])
                     tf_id=[c[0] for c in cos[0:1]]
