@@ -180,18 +180,20 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                     sentence,answer_id=answer_find(context_text,span_start,span_end,answer_replace)
 
 
-                    para_vec=[np.sum([w2vec[word] for word in word_tokenize(s) if word in w2vec],axis=0)
+                    para_vec=[np.average([w2vec[word] for word in word_tokenize(s) if word in w2vec],axis=0)
                                 for s in sent_tokenize(context_text)]
 
-                    sent_vec=np.sum([w2vec[word] for word in word_tokenize(join_text) if word in w2vec],axis=0)
+                    sent_vec=np.average([w2vec[word] for word in word_tokenize(join_text) if word in w2vec],axis=0)
 
                     cos={i:cos_sim(v,sent_vec) for i,v in enumerate(para_vec)}
                     cos=sorted(cos.items(),key=lambda x:-x[1])
                     tf_id=[c[0] for c in cos[0:1]]
 
                     sent=sent_tokenize(context_text)[0]
+                    """
                     print(np.average([1 if word in w2vec else 0 for word in word_tokenize(sent)]))
                     print(sent)
+                    """
 
                     answer_count.append(answer_id in tf_id)
 
