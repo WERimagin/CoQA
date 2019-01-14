@@ -138,7 +138,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
         for i,line in tqdm(enumerate(f)):
             line_split=line.split()
             w2vec[" ".join(line_split[0:-300]).lower()]=[float(i) for i in line_split[-300:]]
-            if i==1000000:
+            if i==50000:
                 break
 
     print("end")
