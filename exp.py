@@ -129,11 +129,12 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
     answer_count=[]
 
 
-    path="~/data/glove.840B.300d.txt"
+    path="/home/6/15B06641/data/glove.840B.300d.txt"
 
     w2vec={}
 
     with open(path,"r")as f:
+        print(path)
         for line in tqdm(f):
             line_split=line.split()
             w2vec[" ".join(line_split[0:-300])]=[float(i) for i in line_split[-300:]]
