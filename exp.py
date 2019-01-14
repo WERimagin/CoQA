@@ -137,7 +137,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
         print(path)
         for i,line in tqdm(enumerate(f)):
             line_split=line.split()
-            w2vec[" ".join(line_split[0:-300])]=[float(i) for i in line_split[-300:]]
+            w2vec[" ".join(line_split[0:-300]).lower()]=[float(i) for i in line_split[-300:]]
             if i==10000:
                 break
 
@@ -188,6 +188,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                     cos={i:cos_sim(v,sent_vec) for i,v in enumerate(para_vec)}
                     cos=sorted(cos.items(),key=lambda x:-x[1])
                     tf_id=[c[0] for c in cos[0:1]]
+                    print(context_text)
 
                     answer_count.append(answer_id in tf_id)
 
@@ -234,12 +235,13 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
 
     print(np.average(answer_count),len(answer_count))
     print(len(questions),len(sentences))
-
+    """
     para_vec=np.sum([w2vec[word] for word in word_tokenize("I love a dog.") if word in w2vec])
     sent_vec=np.sum([w2vec[word] for word in word_tokenize("I love a cat.") if word in w2vec])
     sent2_vec=np.sum([w2vec[word] for word in word_tokenize("You have a pencil.") if word in w2vec])
     print(cos_sim(para_vec,sent_vec))
     print(cos_sim(para_vec,sent2_vec))
+    """
 
 
 
