@@ -138,6 +138,8 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
         for i,line in tqdm(enumerate(f)):
             line_split=line.split()
             w2vec[" ".join(line_split[0:-300]).lower()]=[float(i) for i in line_split[-300:]]
+            if i==50000:
+                break
 
     print("end")
 
@@ -186,6 +188,10 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                     cos={i:cos_sim(v,sent_vec) for i,v in enumerate(para_vec)}
                     cos=sorted(cos.items(),key=lambda x:-x[1])
                     tf_id=[c[0] for c in cos[0:1]]
+
+                    sent=sent_tokenize(context_text)[0]
+                    print(np.average([1  if word in w2vec else 0 word_tokenize(sent)]))
+                    print(sent)
 
                     answer_count.append(answer_id in tf_id)
 
