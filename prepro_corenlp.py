@@ -16,6 +16,7 @@ import pickle
 import collections
 
 from func.tf_idf import tf_idf
+from func.corenlp import CoreNLP
 
 def head_find(tgt):
     q_head=["what","how","who","when","which","where","why","whose","whom","is","are","was","were","do","did","does"]
@@ -97,7 +98,7 @@ def answer_find(context_text,answer_start,answer_end,answer_replace):
             sent_end_id=i
 
 
-    #print(sent_start_id,sent_end_id)
+    print(sent_start_id,sent_end_id)
 
 
     if sent_start_id==-1 or sent_end_id==-1:
@@ -114,11 +115,9 @@ def answer_find(context_text,answer_start,answer_end,answer_replace):
     return answer_sent
 
 
-def data_process(input_path,src_path,tgt_path,dict_path,test=True):
+def data_process(input_path,out_path):
     with open(input_path,"r") as f:
         data=json.load(f)
-    with open(dict_path,"r") as f:
-        corenlp_data=json.load(f)
     contexts=[]
     questions=[]
     answer_starts=[]
@@ -127,114 +126,61 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
     answers=[]
     sentences=[]
     ids=[]
-    answer_replace=False
-    count=0
-    ans_count=[]
 
-
-
-
+    dump_data=[]
+    corenlp=CoreNLP()
 
     for paragraph in tqdm(data["data"]):
         context_text=paragraph["story"].lower()
         question_history=[]
+        interro_history=[]
         for i in range(len(paragraph["questions"])):
             question_dict=paragraph["questions"][i]
             answer_dict=paragraph["answers"][i]
             question_text=question_dict["input_text"].lower()
             answer_text=answer_dict["input_text"].lower()
-            question_history.append((question_text,answer_text))
+            question_history.append(question_text)
 
             span_start=answer_dict["span_start"]
             span_end=answer_dict["span_end"]
             span_text=answer_dict["span_text"]
             turn_id=paragraph["questions"][i]["turn_id"]
 
-            d=corenlp_data[count]
-            if d["vb_check"]==False and d["question_interro"]!="none_tag":
-                if test==False:
-                    start=0
-                    sentence=tf_idf(context_text," ".join(question_history[-2:]),num_canditate=1)
-                    if span_start!=-1:
-                        sentence=answer_find(context_text,span_start,span_end,answer_replace)
-                else:
-                    start=0
-                    if len(question_history)>=2:
-                        join_text=" ".join([question_history[-2][0],question_history[-2][1],question_history[-1][0]])
-                    else:
-                        join_text=question_history[-1][0]
-                    sentence,_=tf_idf(context_text,join_text,num_canditate=1)
+            question_interro,neg_interro,vb_check=corenlp.forward_verbcheck(question_text)#疑問詞を探してくる
+            #if vb_check==False:
+            #    print(question_history[-2:])
 
 
-                sentence=modify(sentence,question_text)
-                sentence=" ".join(tokenize(sentence))
-                question_text=" ".join(tokenize(question_text))
-                sentences.append(sentence)
-                questions.append(question_text)
-            count+=1
-
-            """
-                    if span_start!=-1:
-                        sentence=answer_find(context_text,span_start,span_end,answer_replace)
-                    else:
-                        sentence=tf_idf(context_text," ".join(question_history[-2:]),num_canditate=1)
-                        span_count+=1
-                    sentence=modify(sentence,question_text)
-                    sentence=" ".join(tokenize(sentence))
-                    question_text=" ".join(tokenize(question_text))
-                    sentences.append(sentence)
-                    questions.append(question_text)
-                else:
-                    sentence=modify(context_text,question_text)
-                    sentence=" ".join(tokenize(sentence))
-                    question_text=" ".join(tokenize(question_text))
-                    sentences.append(sentence)
-                    questions.append(question_text)
-            else:
-                #break
-                if len(question_history)>0:
-                    q_his=question_history[-1]
-                    sentence=modify_history(q_his,question_text)
-                    sentence=" ".join(tokenize(sentence))
-                    question_text=" ".join(tokenize(question_text))
-                    sentences.append(sentence)
-                    questions.append(question_text)
-                else:
-                    sentence=" ".join(tokenize(question_text))
-                    question_text=" ".join(tokenize(question_text))
-                    sentences.append(sentence)
-                    questions.append(question_text)
-                question_history.append(question_text)
-            """
-
-    print(len(questions),len(sentences))
+            if question_interro!="none_tag" and question_interro.rstrip()[-1]!="?":
+                question_interro=question_interro+" ?"
+            dump_data.append({"question_interro":question_interro,
+                                "neg_interro":neg_interro,
+                                "vb_check":vb_check})
 
 
 
-    with open(src_path,"w")as f:
-        for s in sentences:
-            f.write(s+"\n")
 
-    with open(tgt_path,"w")as f:
-        for s in questions:
-            f.write(s+"\n")
+
+    print(len(dump_data))
+
+
+
+
+    with open(out_path,"w")as f:
+        json.dump(dump_data,f)
 
 #main
 version="1.1"
-type="interro_cand1"
+type=""
 question_modify=True
 question_interro=True
 
-"""
+
 data_process(input_path="data/coqa-train-v1.0.json",
-            src_path="data/coqa-src-train-{}.txt".format(type),
-            tgt_path="data/coqa-tgt-train-{}.txt".format(type),
-            dict_path="data/coqa-train-corenlp.json"
+            out_path="data/coqa-src-train-corenlp.txt"
             )
 """
 data_process(input_path="data/coqa-dev-v1.0.json",
-            src_path="data/coqa-src-dev-{}.txt".format(type),
-            tgt_path="data/coqa-tgt-dev-{}.txt".format(type),
-            dict_path="data/coqa-dev-corenlp.json",
-            test=True
+            out_path="data/coqa-src-dev-corenlp.txt"
             )
+"""

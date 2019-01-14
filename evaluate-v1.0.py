@@ -9,12 +9,83 @@ import string
 import sys
 
 from collections import Counter, OrderedDict
+from nltk.tokenize import word_tokenize,sent_tokenize
+
 
 OPTS = None
 
 out_domain = ["reddit", "science"]
 in_domain = ["mctest", "gutenberg", "race", "cnn", "wikipedia"]
 domain_mappings = {"mctest":"children_stories", "gutenberg":"literature", "race":"mid-high_school", "cnn":"news", "wikipedia":"wikipedia", "science":"science", "reddit":"reddit"}
+
+def head_find(tgt):
+    q_head=["what","how","who","when","which","where","why","whose","whom","is","are","was","were","do","did","does"]
+    tgt_tokens=word_tokenize(tgt)
+    true_head="<none>"
+    for h in q_head:
+        if h in tgt_tokens:
+            true_head=h
+            break
+    return true_head
+
+def answer_find(context_text,answer_start,answer_end):
+    context=sent_tokenize(context_text)
+    sent_start_id=-1
+    sent_end_id=-1
+    start_id_list=[context_text.find(sent) for sent in context]
+    end_id_list=[start_id_list[i+1] if i+1!=len(context) else len(context_text) for i,sent in enumerate(context)]
+    for i,sent in enumerate(context):
+        start_id=start_id_list[i]
+        end_id=end_id_list[i]
+        if start_id<=answer_start and answer_start<=end_id:
+            sent_start_id=i
+        if start_id<=answer_end and answer_end<=end_id:
+            sent_end_id=i
+
+    if sent_start_id==-1 or sent_end_id==-1:
+        print("error")
+    answer_sent=" ".join(context[sent_start_id:sent_end_id+1])
+
+    return sent_start_id,answer_sent
+
+from nltk.tokenize import word_tokenize,sent_tokenize
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+def cos_sim(v1, v2):
+    if np.linalg.norm(v1)==0 or np.linalg.norm(v2)==0:
+        return np.zeros(1)
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+
+
+def tf_idf_vec(paragraph):
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(paragraph).toarray()
+    return X
+
+def tf_idf(paragraph,question,num_canditate):
+    sentences=sent_tokenize(paragraph)
+    sentences.append(question)
+    vec=tf_idf_vec(sentences)
+    cos={i:cos_sim(v,vec[-1]) for i,v in enumerate(vec[:-1])}
+    cos=sorted(cos.items(),key=lambda x:-x[1])
+    pred_question=" ".join([sentences[c[0]] for c in cos[0:num_canditate]])
+    return [c[0] for c in cos[0:num_canditate]]
+
+
+
+    if sent_start_id==-1 or sent_end_id==-1:
+        #sys.exit(-1)
+        print("error")
+        #sys.exit(-1)
+    answer_sent=" ".join(context[sent_start_id:sent_end_id+1])
+    #ここで答えを置換する方法。ピリオドが消滅した場合などに危険なので止める。
+    """
+    if answer_replace:
+        context_text=context_text.replace(context[answer_start:answer_end],"<answer_word>")
+        answer_sent=sent_tokenize(context_text)[sent_start_id]
+    """
+    return sent_start_id,answer_sent
 
 
 class CoQAEvaluator():
@@ -24,30 +95,68 @@ class CoQAEvaluator():
 
     @staticmethod
     def gold_answers_to_dict(gold_file):
+
+        with open("data/coqa-dev-corenlp.json")as f:
+            corenlp_data=json.load(f)
+        corenlp_count=-1
+        mydict=Counter()
+        m_interro="why"
+
+
         dataset = json.load(open(gold_file))
         gold_dict = {}
         id_to_source = {}
         for story in dataset['data']:
             source = story['source']
+            context_text=story["story"]
             story_id = story['id']
             id_to_source[story_id] = source
             questions = story['questions']
             multiple_answers = [story['answers']]
             multiple_answers += story['additional_answers'].values()
+
+            question_history=[]
+
             for i, qa in enumerate(questions):
-                qid = qa['turn_id']
-                if i + 1 != qid:
-                    sys.stderr.write("Turn id should match index {}: {}\n".format(i + 1, qa))
-                gold_answers = []
-                for answers in multiple_answers:
-                    answer = answers[i]
-                    if qid != answer['turn_id']:
-                        sys.stderr.write("Question turn id does match answer: {} {}\n".format(qa, answer))
-                    gold_answers.append(answer['input_text'])
-                key = (story_id, qid)
-                if key in gold_dict:
-                    sys.stderr.write("Gold file has duplicate stories: {}".format(source))
-                gold_dict[key] = gold_answers
+                corenlp_count+=1
+                question_dict=story["questions"][i]
+                question_text=question_dict["input_text"].lower()
+                answer_dict=story["answers"][i]
+                answer_text=answer_dict["input_text"].lower()
+                span_start=answer_dict["span_start"]
+                span_end=answer_dict["span_end"]
+                question_history.append((question_text,answer_text))
+
+                c_data=corenlp_data[corenlp_count]
+
+                if c_data["vb_check"]==False and c_data["question_interro"]!="none_tag":
+                    if span_start==-1 or len(question_history)<=1:
+                        continue
+                    """
+                    q_text=qa["input_text"].lower()
+                    interro=head_find(q_text)
+                    """
+                    start_id,sentence=answer_find(context_text,span_start,span_end)
+                    a_text=" ".join([question_history[-2][0],question_history[-2][1],question_history[-1][0]])
+                    tf_id=tf_idf(context_text,a_text,num_canditate=1)
+                    if start_id not in tf_id:
+                        continue
+
+                    qid = qa['turn_id']
+                    if i + 1 != qid:
+                        sys.stderr.write("Turn id should match index {}: {}\n".format(i + 1, qa))
+                    gold_answers = []
+                    for answers in multiple_answers:
+                        answer = answers[i]
+                        if qid != answer['turn_id']:
+                            sys.stderr.write("Question turn id does match answer: {} {}\n".format(qa, answer))
+                        gold_answers.append(answer['input_text'])
+                    key = (story_id, qid)
+                    if key in gold_dict:
+                        sys.stderr.write("Gold file has duplicate stories: {}".format(source))
+                    gold_dict[key] = gold_answers
+
+        print(len(list(gold_dict.items())))
         return gold_dict, id_to_source
 
     @staticmethod
@@ -123,6 +232,7 @@ class CoQAEvaluator():
         ''' This is the function what you are probably looking for. a_pred is the answer string your model predicted. '''
         key = (story_id, turn_id)
         a_gold_list = self.gold_data[key]
+        #print(a_gold_list[0],a_pred)
         return CoQAEvaluator._compute_turn_score(a_gold_list, a_pred)
 
     def get_raw_scores(self, pred_data):
@@ -219,7 +329,7 @@ class CoQAEvaluator():
                              'f1': round(f1_total / max(1, turn_count) * 100, 1),
                              'turns': turn_count}
 
-        return scores
+        return scores["overall"]
 
 def parse_args():
     parser = argparse.ArgumentParser('Official evaluation script for CoQA.')

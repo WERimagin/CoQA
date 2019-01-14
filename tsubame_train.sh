@@ -2,9 +2,9 @@
 ##n current working directory
 #$ -cwd
 ## Resource type F: qty 2
-#$ -l f_node=1
+#$ -l f_node=2
 ## maximum run time
-#$ -l h_rt=0:10:00
+#$ -l h_rt=1:30:00
 ## output filename
 #$ -N sample
 
@@ -14,6 +14,5 @@ module load intel
 module load cuda
 module load openmpi
 #実行
-source ../imagin/bin/activate
-export PYTHONPATH=/home/6/15B06641/CoQA
-python3 question_maker/train.py
+source imagin/bin/activate
+python3 train.py

@@ -9,6 +9,7 @@ import collections
 import math
 from statistics import mean, median,variance,stdev
 
+
 def compute_score(t,p):
     t_dict=collections.Counter(t)
     p_dict=collections.Counter(p)
@@ -57,17 +58,17 @@ if modify==True:
 coqa=True
 
 if coqa==False:
-    type="interro_history"
+    type="interro_only"
     src_path="data/squad-src-dev-{}.txt".format(type)
     tgt_path="data/squad-tgt-dev-{}.txt".format(type)
     pred_path="data/pred_{}.txt".format(type)
 
-
 if coqa==True:
-    type="interro_history"
-    src_path="data/coqa-src-dev-{}.txt".format(type)
-    tgt_path="data/coqa-tgt-dev-{}.txt".format(type)
-    pred_path="data/pred_coqa_{}.txt".format(type)
+    type="split2-interro"
+    src_path="data/coqa-src-train-{}.txt".format(type)
+    tgt_path="data/coqa-tgt-train-{}.txt".format(type)
+    #pred_path="data/pred_coqa_{}.txt".format(type)
+    pred_path="data/pred_coqa_split2_interro.txt"
 
 
 
@@ -75,6 +76,7 @@ src=[]
 target=[]
 predict=[]
 
+"""
 with open(src_path)as f:
     for line in f:
         src.append(line[:-1])
@@ -86,39 +88,74 @@ with open(tgt_path)as f:
 with open(pred_path)as f:
     for line in f:
         predict.append(line[:-1])
+"""
+
+with open(src_path)as f:
+    for i,line in enumerate(f):
+        src.append(line[:-1])
+
+with open(tgt_path)as f:
+    for i,line in enumerate(f):
+        target.append(line[:-1])
+
+with open(pred_path)as f:
+    for i,line in enumerate(f):
+        predict.append(line[:-1])
 
 
-for i in range(200,1300):
-    s=src[i]
-    t=target[i]
-    p=predict[i]
-    if len(t.split())<4:
-        print(s)
-        print(t)
-        print(p)
-        print()
 
+total=0
+verb_count=0
+if True:
+    for i in tqdm(range(0,10000)):
+        s=src[i]
+        t=target[i]
+        p=predict[i]
+        if len(s)<100:
+            print(s)
+            print(t)
+            print(p)
+            print()
 
+src2=[]
+
+for s in src:
+    #print(s)
+    s=s.split()
+    interro_pos=s.index("interro_tag")
+    sent=s[interro_pos+1:]
+    interro=s[:interro_pos]
+    if interro[-1]=="?":
+        interro=interro[:-1]
+    sent=sent+interro
+    src2.append(sent)
+    #print(sent)
+
+print(len(src),len(src2),len(target),len(predict))
 
 target=[t.split() for t in target]
 predict=[p.split() for p in predict]
 
-
-
-
+"""
+for i in tqdm(range(len(target))):
+    s=src[i]
+    t=target[i]
+    p=predict[i]
+    #"if len(t.split())<4:
+    if corenlp.verb_check(t)==False:
+        verb_count+=1
+    total+=1
+"""
 
 
 #一文ずつ評価,corpusのサイズ考慮
 if True:
-    nltk_target=list(map(lambda x:[x],target))
+    #nltk_src=src2
+    nltk_target=[[t] for t in target]
     nltk_predict=predict
-    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(1,0,0,0)))
-    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.5,0.5,0,0)))
-    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict,weights=(0.333,0.333,0.333,0)))
     print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_predict))
+    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,nltk_src))
 
-    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,interro_list,weights=(1,0,0,0)))
-    print(nltk.translate.bleu_score.corpus_bleu(nltk_target,interro_list))
     """
     count_target=sum(map(len,target))
     count_predict=sum(map(len,predict))

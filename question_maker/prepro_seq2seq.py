@@ -105,7 +105,8 @@ def answer_find(context_text,answer_start,answer_end,answer_replace):
 
 
 
-def data_process(input_path,src_path,tgt_path,question_modify,train=True,complete=True,paragraph=True,history=True):
+def data_process(input_path,src_path,tgt_path,question_modify,train=True,
+                complete=True,paragraph=True,history=True):
     with open(input_path,"r") as f:
         data=json.load(f)
     contexts=[]
@@ -140,8 +141,11 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,complet
                     if history==False:
                         question_interro,neg_interro=corenlp.forward(question_text)#疑問詞を探してくる
                         if question_interro=="none_tag":
+                            print(question_text)
                             continue
-                        sentence_interro=modify(context_text,question_interro)
+                        if question_interro.rstrip()[-1]!="?":
+                            question_interro=question_interro+" ?"
+                        sentence_interro=" ".join([sentence,"interro_tag",question_interro])
                         sentence_interro=" ".join(tokenize(sentence_interro))
                         answer_text=" ".join(tokenize(answer_text))
                         question_text=" ".join(tokenize(question_text))
@@ -154,6 +158,7 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,complet
                             question_text=" ".join(tokenize(question_text))
                             questions.append(question_text)
                             sentences.append(sentence)
+                    """
                     else:
                         question_interro,neg_interro=corenlp.forward(question_text)#疑問詞を探してくる
                         if question_interro=="none_tag":
@@ -189,6 +194,7 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,complet
 
                         question_history.append((question_text,question_interro))
                         pos_interro=question_interro
+                    """
 
 
     print(len(questions),len(sentences))
@@ -203,7 +209,7 @@ def data_process(input_path,src_path,tgt_path,question_modify,train=True,complet
 
 #main
 version="1.1"
-type="interro_history"
+type="interro_only"
 question_modify=True
 question_interro=True
 
@@ -215,9 +221,9 @@ data_process(input_path="data/squad-train-v{}.json".format(version),
             tgt_path="data/squad-tgt-train-{}.txt".format(type),
             question_modify=True,
             train=True,
-            complete=True,
+            complete=False,
             paragraph=False,
-            history=True
+            history=False
             )
 """
 data_process(input_path="data/squad-dev-v{}.json".format(version),
@@ -225,8 +231,8 @@ data_process(input_path="data/squad-dev-v{}.json".format(version),
             tgt_path="data/squad-tgt-dev-{}.txt".format(type),
             question_modify=True,
             train=False,
-            complete=True,
+            complete=False,
             paragraph=False,
-            history=True
+            history=False
             )
 """

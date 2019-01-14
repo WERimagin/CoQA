@@ -37,6 +37,7 @@ class CoreNLP():
 
         #疑問詞がなかった時のエラー処理
         if interro_id==-1:
+            print(text)
             #print(self.count)
             return "none_tag","none_tag"
 
@@ -58,3 +59,69 @@ class CoreNLP():
         question=" ".join([token_list[node]["text"] for node in node_list])
         neg_question=" ".join([token_list[node]["text"] for node in neg_node_list])
         return question,neg_question
+
+    def verb_check(self,text):
+        q=self.nlp.annotate(text, properties={'annotators': 'tokenize,ssplit,pos','outputFormat': 'json'})
+        pos_list=[]
+        for sentence in q["sentences"]:
+            for token in sentence["tokens"]:
+                pos_list.append(token["pos"])
+
+        for pos in pos_list:
+            if "VB" in pos:
+                return True
+        return False
+
+    def forward_verbcheck(self,text):#input:(batch,seq_len)
+        self.count+=1
+        q=self.nlp.annotate(text, properties={'annotators': 'tokenize,ssplit,parse','outputFormat': 'json'})
+
+        tokens=q["sentences"][0]["tokens"]
+        deps=q["sentences"][0]["basicDependencies"]
+
+        token_list=[]
+        token_list.append({"index":0,"text":"ROOT"})
+        interro_id=-1
+        for token in tokens:
+            token_list.append({"index":token["index"],"text":token["originalText"],"pos":token["pos"]})
+        for token in tokens:
+            if interro_id==-1 and token["pos"] in self.interro_list[0:4]:#疑問詞のチェック
+                interro_id=token["index"]
+        for token in tokens:
+            if interro_id==-1 and token["pos"] in self.interro_list[4:]:#疑問詞のチェック
+                interro_id=token["index"]
+
+        #疑問詞がなかった時のエラー処理
+        if interro_id==-1:
+            #print(self.count)
+            return "none_tag",text,False
+
+        #vb
+        pos_list=[]
+        for sentence in q["sentences"]:
+            for token in sentence["tokens"]:
+                pos_list.append(token["pos"])
+
+        vb_check=False
+
+        for pos in pos_list:
+            if "VB" in pos:
+                 vb_check=True
+
+        G = nx.DiGraph()
+        G.add_nodes_from(range(len(token_list)))
+        for dep in deps:
+            G.add_path([dep["dependent"],dep["governor"]])
+        if nx.has_path(G,interro_id,0)==False:
+            print("error")
+        s_path=nx.shortest_path(G,interro_id,0)
+
+
+        if len(s_path)==2:#疑問詞だけ
+            node_list=[s_path[0]]
+        else:#疑問詞周り
+            node_list=[node for node in G.nodes() if nx.has_path(G,node,s_path[-3])]
+        neg_node_list=[node for node in G.nodes() if node not in node_list and node!=0]
+        question=" ".join([token_list[node]["text"] for node in node_list])
+        neg_question=" ".join([token_list[node]["text"] for node in neg_node_list])
+        return question,neg_question,vb_check

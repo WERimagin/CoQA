@@ -114,11 +114,16 @@ def answer_find(context_text,answer_start,answer_end,answer_replace):
     return answer_sent
 
 
-def data_process(input_path,src_path,tgt_path,dict_path,test=True):
+def data_process(input_path,output_path,dict_path,modify_path):
     with open(input_path,"r") as f:
         data=json.load(f)
     with open(dict_path,"r") as f:
         corenlp_data=json.load(f)
+
+    modify_data=[]
+    with open(modify_path,"r") as f:
+        for line in f:
+            modify_data.append(line.rstrip())
     contexts=[]
     questions=[]
     answer_starts=[]
@@ -129,12 +134,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
     ids=[]
     answer_replace=False
     count=0
-    ans_count=[]
-
-
-
-
-
+    modify_count=0
     for paragraph in tqdm(data["data"]):
         context_text=paragraph["story"].lower()
         question_history=[]
@@ -143,7 +143,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
             answer_dict=paragraph["answers"][i]
             question_text=question_dict["input_text"].lower()
             answer_text=answer_dict["input_text"].lower()
-            question_history.append((question_text,answer_text))
+            question_history.append(question_text)
 
             span_start=answer_dict["span_start"]
             span_end=answer_dict["span_end"]
@@ -151,26 +151,18 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
             turn_id=paragraph["questions"][i]["turn_id"]
 
             d=corenlp_data[count]
+
+
             if d["vb_check"]==False and d["question_interro"]!="none_tag":
-                if test==False:
-                    start=0
-                    sentence=tf_idf(context_text," ".join(question_history[-2:]),num_canditate=1)
-                    if span_start!=-1:
-                        sentence=answer_find(context_text,span_start,span_end,answer_replace)
-                else:
-                    start=0
-                    if len(question_history)>=2:
-                        join_text=" ".join([question_history[-2][0],question_history[-2][1],question_history[-1][0]])
-                    else:
-                        join_text=question_history[-1][0]
-                    sentence,_=tf_idf(context_text,join_text,num_canditate=1)
-
-
-                sentence=modify(sentence,question_text)
-                sentence=" ".join(tokenize(sentence))
-                question_text=" ".join(tokenize(question_text))
-                sentences.append(sentence)
-                questions.append(question_text)
+                h=corenlp_data[count-1]
+                his_neg=h["neg_interro"]
+                print(question_text,"tagtag",h["question_interro"],h["neg_interro"])
+                if question_text[-1]=="?":
+                    question_text=question_text[:-1].rstrip()
+                question_text=" ".join([question_text,his_neg])
+                paragraph["questions"][i]["input_text"]=question_text
+                modify_count+=1
+                print(question_text)
             count+=1
 
             """
@@ -207,34 +199,28 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                 question_history.append(question_text)
             """
 
-    print(len(questions),len(sentences))
+    print(count,modify_count)
 
 
 
-    with open(src_path,"w")as f:
-        for s in sentences:
-            f.write(s+"\n")
-
-    with open(tgt_path,"w")as f:
-        for s in questions:
-            f.write(s+"\n")
+    with open(output_path,"w")as f:
+        json.dump(data,f)
 
 #main
 version="1.1"
-type="interro_cand1"
+type="interro"
 question_modify=True
 question_interro=True
 
+data_process(input_path="data/coqa-dev-v1.0.json",
+            output_path="data/coqa-dev-rule.json",
+            dict_path="data/coqa-dev-corenlp.json",
+            modify_path="data/pred_coqa-dev-{}.txt".format(type)
+            )
 """
 data_process(input_path="data/coqa-train-v1.0.json",
-            src_path="data/coqa-src-train-{}.txt".format(type),
-            tgt_path="data/coqa-tgt-train-{}.txt".format(type),
-            dict_path="data/coqa-train-corenlp.json"
+            output_path="data/coqa-train-modify.json",
+            dict_path="data/coqa-train-corenlp.json",
+            modify_path="data/pred_coqa-train-{}.txt".format(type)
             )
 """
-data_process(input_path="data/coqa-dev-v1.0.json",
-            src_path="data/coqa-src-dev-{}.txt".format(type),
-            tgt_path="data/coqa-tgt-dev-{}.txt".format(type),
-            dict_path="data/coqa-dev-corenlp.json",
-            test=True
-            )

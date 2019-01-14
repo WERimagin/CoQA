@@ -15,7 +15,8 @@ from nltk.tokenize import word_tokenize,sent_tokenize
 import pickle
 import collections
 
-from func.tf_idf import tf_idf
+from func.tf_idf import tf_idf,cos_sim
+
 
 def head_find(tgt):
     q_head=["what","how","who","when","which","where","why","whose","whom","is","are","was","were","do","did","does"]
@@ -106,12 +107,8 @@ def answer_find(context_text,answer_start,answer_end,answer_replace):
         #sys.exit(-1)
     answer_sent=" ".join(context[sent_start_id:sent_end_id+1])
     #ここで答えを置換する方法。ピリオドが消滅した場合などに危険なので止める。
-    """
-    if answer_replace:
-        context_text=context_text.replace(context[answer_start:answer_end],"<answer_word>")
-        answer_sent=sent_tokenize(context_text)[sent_start_id]
-    """
-    return answer_sent
+
+    return answer_sent,sent_start_id
 
 
 def data_process(input_path,src_path,tgt_path,dict_path,test=True):
@@ -128,10 +125,18 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
     sentences=[]
     ids=[]
     answer_replace=False
-    count=0
-    ans_count=[]
+    count=-1
+    answer_count=[]
 
 
+    path="~/data/glove.840B.300d.txt"
+
+    w2vec={}
+
+    with open(path,"r")as f:
+        for line in tqdm(f):
+            line_split=line.split()
+            w2vec[" ".join(line_split[0:-300])]=[float(i) for i in line_split[-300:]]
 
 
 
@@ -139,6 +144,8 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
         context_text=paragraph["story"].lower()
         question_history=[]
         for i in range(len(paragraph["questions"])):
+            count+=1
+
             question_dict=paragraph["questions"][i]
             answer_dict=paragraph["answers"][i]
             question_text=question_dict["input_text"].lower()
@@ -158,12 +165,26 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                     if span_start!=-1:
                         sentence=answer_find(context_text,span_start,span_end,answer_replace)
                 else:
+                    if span_start==-1:
+                        continue
                     start=0
                     if len(question_history)>=2:
                         join_text=" ".join([question_history[-2][0],question_history[-2][1],question_history[-1][0]])
                     else:
                         join_text=question_history[-1][0]
-                    sentence,_=tf_idf(context_text,join_text,num_canditate=1)
+                    sentence,answer_id=answer_find(context_text,span_start,span_end,answer_replace)
+
+
+                    para_vec=[np.sum([w2vec[word] for word in word_tokenize(s) if word in w2vec])
+                                for s in sent_tokenize(context_text)]
+
+                    sent_vec=np.sum([w2vec[word] for word in word_tokenize(join_text) if word in w2vec])
+
+                    cos={i:cos_sim(v,sent_vec) for i,v in enumerate(para_vec)}
+                    cos=sorted(cos.items(),key=lambda x:-x[1])
+                    tf_id=[c[0] for c in cos[0:1]]
+
+                    answer_count.append(answer_id in tf_id)
 
 
                 sentence=modify(sentence,question_text)
@@ -171,7 +192,6 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                 question_text=" ".join(tokenize(question_text))
                 sentences.append(sentence)
                 questions.append(question_text)
-            count+=1
 
             """
                     if span_start!=-1:
@@ -207,17 +227,11 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                 question_history.append(question_text)
             """
 
+    print(np.average(answer_count),len(answer_count))
     print(len(questions),len(sentences))
 
 
 
-    with open(src_path,"w")as f:
-        for s in sentences:
-            f.write(s+"\n")
-
-    with open(tgt_path,"w")as f:
-        for s in questions:
-            f.write(s+"\n")
 
 #main
 version="1.1"
