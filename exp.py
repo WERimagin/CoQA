@@ -185,7 +185,6 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
 
                     sent_vec=np.sum([w2vec[word] for word in word_tokenize(join_text) if word in w2vec],axis=0)
 
-                    print(sent_vec)
 
                     cos={i:cos_sim(v,sent_vec) for i,v in enumerate(para_vec)}
                     cos=sorted(cos.items(),key=lambda x:-x[1])
