@@ -190,7 +190,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                     tf_id=[c[0] for c in cos[0:1]]
 
                     sent=sent_tokenize(context_text)[0]
-                    print(np.average([1  if word in w2vec else 0 word_tokenize(sent)]))
+                    print(np.average([1 if word in w2vec else 0 for word in word_tokenize(sent)]))
                     print(sent)
 
                     answer_count.append(answer_id in tf_id)
