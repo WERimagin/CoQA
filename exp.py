@@ -128,7 +128,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
     count=-1
     answer_count=[]
 
-
+    #path="data/glove.840B.300d.txt"
     path="/home/6/15B06641/data/glove.840B.300d.txt"
 
     w2vec={}
@@ -138,8 +138,7 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
         for i,line in tqdm(enumerate(f)):
             line_split=line.split()
             w2vec[" ".join(line_split[0:-300])]=[float(i) for i in line_split[-300:]]
-            print(" ".join(line_split[0:-300]))
-            if i==1000:
+            if i==10000:
                 break
 
     print("end")
@@ -236,6 +235,11 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
     print(np.average(answer_count),len(answer_count))
     print(len(questions),len(sentences))
 
+    para_vec=np.sum([w2vec[word] for word in word_tokenize("I love a dog.") if word in w2vec])
+    sent_vec=np.sum([w2vec[word] for word in word_tokenize("I love a cat.") if word in w2vec])
+    sent2_vec=np.sum([w2vec[word] for word in word_tokenize("You have a pencil.") if word in w2vec])
+    print(cos_sim(para_vec,sent_vec))
+    print(cos_sim(para_vec,sent2_vec))
 
 
 
