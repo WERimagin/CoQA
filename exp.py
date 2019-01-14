@@ -188,7 +188,6 @@ def data_process(input_path,src_path,tgt_path,dict_path,test=True):
                     cos={i:cos_sim(v,sent_vec) for i,v in enumerate(para_vec)}
                     cos=sorted(cos.items(),key=lambda x:-x[1])
                     tf_id=[c[0] for c in cos[0:1]]
-                    print(context_text)
 
                     answer_count.append(answer_id in tf_id)
 
